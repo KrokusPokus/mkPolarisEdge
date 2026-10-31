@@ -13,7 +13,7 @@
      </property>
      <widget class="QWidget" name="appearanceTab">
       <attribute name="title">
-       <string>Aussehen</string>
+       <string>Appearance</string>
       </attribute>
       <layout class="QFormLayout" name="appearanceLayout">
        <property name="formAlignment">
@@ -25,7 +25,7 @@
        <item row="0" column="0">
         <widget class="QLabel" name="frameLineColorLabel">
          <property name="text">
-          <string>Linienfarbe:</string>
+          <string>Line color:</string>
          </property>
          <property name="buddy">
           <cstring>frameLineColor</cstring>
@@ -37,13 +37,13 @@
          <item>
           <widget class="QComboBox" name="frameLineColor">
            <property name="toolTip">
-            <string>Farbe der Rahmenlinie aktiver Fenster (die Farbvarianten der mkAurorae-Designs)</string>
+            <string>Color of the frame line of active windows (the color variants of the mkAurorae themes)</string>
            </property>
-           <item><property name="text"><string>Grau</string></property></item>
-           <item><property name="text"><string>Akzentfarbe</string></property></item>
-           <item><property name="text"><string>Lila</string></property></item>
-           <item><property name="text"><string>Rot</string></property></item>
-           <item><property name="text"><string>Eigene Farbe</string></property></item>
+           <item><property name="text"><string comment="@item:inlistbox Line color:">Gray</string></property></item>
+           <item><property name="text"><string comment="@item:inlistbox Line color:">Accent color</string></property></item>
+           <item><property name="text"><string comment="@item:inlistbox Line color:">Purple</string></property></item>
+           <item><property name="text"><string comment="@item:inlistbox Line color:">Red</string></property></item>
+           <item><property name="text"><string comment="@item:inlistbox Line color:">Custom color</string></property></item>
           </widget>
          </item>
          <item>
@@ -61,17 +61,17 @@
        <item row="1" column="1">
         <widget class="QCheckBox" name="frameLineBold">
          <property name="text">
-          <string>Breite Linie</string>
+          <string>Bold line</string>
          </property>
          <property name="toolTip">
-          <string>Rahmenlinie 2 px breit, wie die B-Varianten der mkAurorae-Designs (die Ecken bleiben 1 px)</string>
+          <string>2 px frame line, as in the B variants of the mkAurorae themes (the corners stay 1 px)</string>
          </property>
         </widget>
        </item>
        <item row="2" column="0">
         <widget class="QLabel" name="titleAlignmentLabel">
          <property name="text">
-          <string>Titelausrichtung:</string>
+          <string>Title alignment:</string>
          </property>
          <property name="buddy">
           <cstring>titleAlignment</cstring>
@@ -80,17 +80,17 @@
        </item>
        <item row="2" column="1">
         <widget class="QComboBox" name="titleAlignment">
-         <item><property name="text"><string>Links</string></property></item>
-         <item><property name="text"><string>Mittig</string></property></item>
-         <item><property name="text"><string>Mittig (ganze Breite)</string></property></item>
-         <item><property name="text"><string>Rechts</string></property></item>
+         <item><property name="text"><string comment="@item:inlistbox alignment">Left</string></property></item>
+         <item><property name="text"><string comment="@item:inlistbox alignment">Center</string></property></item>
+         <item><property name="text"><string comment="@item:inlistbox alignment">Center (Full Width)</string></property></item>
+         <item><property name="text"><string comment="@item:inlistbox alignment">Right</string></property></item>
         </widget>
        </item>
       </layout>
      </widget>
      <widget class="QWidget" name="shadowTab">
       <attribute name="title">
-       <string>Schatten</string>
+       <string>Shadows</string>
       </attribute>
       <layout class="QFormLayout" name="shadowLayout">
        <property name="formAlignment">
@@ -102,7 +102,7 @@
        <item row="0" column="0">
         <widget class="QLabel" name="shadowSizeLabel">
          <property name="text">
-          <string>Schattengröße:</string>
+          <string>Shadow size:</string>
          </property>
          <property name="buddy">
           <cstring>shadowSize</cstring>
@@ -111,17 +111,17 @@
        </item>
        <item row="0" column="1">
         <widget class="QComboBox" name="shadowSize">
-         <item><property name="text"><string>Kein Schatten</string></property></item>
-         <item><property name="text"><string>Klein</string></property></item>
-         <item><property name="text"><string>Mittel</string></property></item>
-         <item><property name="text"><string>Groß</string></property></item>
-         <item><property name="text"><string>Sehr groß</string></property></item>
+         <item><property name="text"><string comment="@item:inlistbox Shadow size:">None</string></property></item>
+         <item><property name="text"><string comment="@item:inlistbox Shadow size:">Small</string></property></item>
+         <item><property name="text"><string comment="@item:inlistbox Shadow size:">Medium</string></property></item>
+         <item><property name="text"><string comment="@item:inlistbox Shadow size:">Large</string></property></item>
+         <item><property name="text"><string comment="@item:inlistbox Shadow size:">Very Large</string></property></item>
         </widget>
        </item>
        <item row="1" column="0">
         <widget class="QLabel" name="shadowStrengthLabel">
          <property name="text">
-          <string>Schattenstärke:</string>
+          <string comment="strength of the shadow (from transparent to opaque)">Shadow strength:</string>
          </property>
          <property name="buddy">
           <cstring>shadowStrength</cstring>
@@ -144,7 +144,7 @@
        <item row="2" column="0">
         <widget class="QLabel" name="shadowColorLabel">
          <property name="text">
-          <string>Schattenfarbe:</string>
+          <string>Shadow color:</string>
          </property>
         </widget>
        </item>
