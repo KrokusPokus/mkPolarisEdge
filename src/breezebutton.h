@@ -94,6 +94,8 @@ private:
 
     //* draw button icon
     void drawIcon(QPainter *) const;
+    //* mkAuroraeNext: draws the button from the SVGs of the mkAurorae themes
+    void drawThemeButton(QPainter *) const;
 
     //*@name colors
     //@{

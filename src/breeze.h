@@ -8,6 +8,7 @@
 
 #include "breezesettings.h"
 
+#include <QColor>
 #include <QList>
 #include <QSharedPointer>
 
@@ -34,15 +35,42 @@ static constexpr int TitleBar_BottomMargin = 2;
 static constexpr int TitleBar_SideMargin = 2;
 static constexpr int TitleBar_ButtonSpacing = 2;
 
-//* mkAuroraeNext: geometry of the mkAurorae themes (logical pixels, decoration.svg and the theme rc file).
+//* mkAuroraeNext: geometry of the mkAurorae themes (logical pixels, from decoration.svg, the button SVGs and the rc file).
 // The resize area is exactly the visible frame: there are no resize borders outside of it.
 static constexpr int Frame_BorderWidth = 4;     // left, right, bottom and the strip above the title bar
-static constexpr int TitleBar_EdgeTop = 3;      // TitleEdgeTop
-static constexpr int TitleBar_Height = 16;      // TitleHeight: height of buttons and caption
+static constexpr int TitleBar_EdgeTop = 3;      // TitleEdgeTop: from the outer edge to the buttons
+static constexpr int TitleBar_ButtonSize = 20;  // Aurorae default button size; the 22 x 22 button SVGs are scaled to it
 static constexpr int TitleBar_EdgeBottom = 3;   // TitleEdgeBottom
-static constexpr int TitleBar_EdgeLeft = 10;    // TitleEdgeLeft: from the frame to the left buttons
-static constexpr int TitleBar_EdgeRight = 5;    // TitleEdgeRight: from the right buttons to the frame
+static constexpr int TitleBar_EdgeLeft = 10;    // TitleEdgeLeft: from the outer window edge to the left buttons
+static constexpr int TitleBar_EdgeRight = 5;    // TitleEdgeRight: from the right buttons to the outer window edge
+static constexpr int TitleBar_CaptionMargin = 5; // between the buttons and the caption
+//* height of the top part of the decoration, measured from the outer edge: 3 + 20 + 3 = 26
+static constexpr int TitleBar_TotalHeight = TitleBar_EdgeTop + TitleBar_ButtonSize + TitleBar_EdgeBottom;
+}
 
+//* mkAuroraeNext: colors of the mkAurorae themes (decoration.svg)
+namespace Theme
+{
+inline const QColor Rim(0x22, 0x22, 0x22);          // outermost pixel
+inline const QColor Rim_Top(0x27, 0x27, 0x27);      // its top row; in the top corners a gradient Rim_Top -> Rim over 26 px
+inline const QColor Inner(0x24, 0x24, 0x24);        // pixels 2 and 3 of the frame
+inline const QColor Title_Light(0x35, 0x35, 0x35);  // title gradient, active: light at the top, inactive: reversed
+inline const QColor Title_Dark(0x24, 0x24, 0x24);
+inline const QColor Separator(0x2c, 0x2c, 0x2c);    // row 24
+inline const QColor Separator_Active(0x21, 0x21, 0x21);   // row 25
+inline const QColor Separator_Inactive(0x3c, 0x3c, 0x3c);
+inline const QColor Line_Inactive(0x50, 0x50, 0x50);      // frame line of inactive windows (and of the gray variant)
+inline const QColor Line_InactiveTop(0x5e, 0x5e, 0x5e);   // its top row
+inline const QColor Line_Purple(0x85, 0x00, 0xf7);
+inline const QColor Line_Red(0xff, 0x00, 0x00);
+inline const QColor Text_Active(255, 255, 255);     // ActiveTextColor
+inline const QColor Text_Inactive(128, 128, 128);   // InactiveTextColor
+static constexpr qreal Corner_OuterRadius = 3;      // frame line corners of the active window: outside ...
+static constexpr qreal Corner_InnerRadius = 2;      // ... and inside
+}
+
+namespace Metrics
+{
 // shadow dimensions (pixels)
 static constexpr int Shadow_Overlap = 3;
 

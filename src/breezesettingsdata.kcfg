@@ -23,7 +23,8 @@
           <choice name="ShadowLarge"/>
           <choice name="ShadowVeryLarge"/>
       </choices>
-      <default>ShadowLarge</default>
+      <!-- mkAuroraeNext: no shadow, as in the mkAurorae themes (Shadow=false) -->
+      <default>ShadowNone</default>
     </entry>
 
     <entry name="ShadowColor" type = "Color">
@@ -74,7 +75,7 @@
           <choice name="AlignCenterFullWidth" />
           <choice name="AlignRight" />
       </choices>
-      <default>AlignCenterFullWidth</default>
+      <default>AlignLeft</default>
     </entry>
 
     <!-- button size -->
@@ -121,6 +122,22 @@
 
     <entry name="Mask" type = "Int">
       <default>0</default>
+    </entry>
+
+    <!-- mkAuroraeNext: color of the frame line of active windows (the mkAurorae variants) -->
+    <entry name="FrameLineColor" type="Enum">
+      <choices>
+          <choice name="LineGray" />
+          <choice name="LineAccent" />
+          <choice name="LinePurple" />
+          <choice name="LineRed" />
+      </choices>
+      <default>LinePurple</default>
+    </entry>
+
+    <!-- mkAuroraeNext: 2 px frame line on the straight parts, as in the "B" variants (corners stay 1 px) -->
+    <entry name="FrameLineBold" type="Bool">
+      <default>false</default>
     </entry>
 
   </group>

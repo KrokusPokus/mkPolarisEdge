@@ -6,6 +6,9 @@
  */
 #include "breezebutton.h"
 
+#include <QHash>
+#include <QSvgRenderer>
+
 #include <KColorUtils>
 #include <KDecoration3/DecoratedWindow>
 #include <KIconLoader>
@@ -129,10 +132,54 @@ void Button::paint(QPainter *painter, const QRectF &repaintRegion)
     case KDecoration3::DecorationButtonType::Spacer:
         break;
     default:
-        painter->save();
-        drawIcon(painter);
-        painter->restore();
+        drawThemeButton(painter);
         break;
+    }
+}
+
+//__________________________________________________________________
+void Button::drawThemeButton(QPainter *painter) const
+{
+    // mkAuroraeNext: the button SVGs of the mkAurorae themes (identical in all variants), element per state as in
+    // Aurorae: deactivated, pressed (also for checked toggle buttons), hover, else active or inactive. The 22 x 22
+    // element is drawn into the 20 x 20 button.
+    QString sFile;
+    switch (type()) {
+    case KDecoration3::DecorationButtonType::Close: sFile = QStringLiteral("close"); break;
+    case KDecoration3::DecorationButtonType::Minimize: sFile = QStringLiteral("minimize"); break;
+    case KDecoration3::DecorationButtonType::Maximize: sFile = isChecked() ? QStringLiteral("restore") : QStringLiteral("maximize"); break;
+    case KDecoration3::DecorationButtonType::ContextHelp: sFile = QStringLiteral("help"); break;
+    case KDecoration3::DecorationButtonType::KeepAbove: sFile = QStringLiteral("keepabove"); break;
+    case KDecoration3::DecorationButtonType::KeepBelow: sFile = QStringLiteral("keepbelow"); break;
+    case KDecoration3::DecorationButtonType::OnAllDesktops: sFile = QStringLiteral("alldesktops"); break;
+    case KDecoration3::DecorationButtonType::Shade: sFile = QStringLiteral("shade"); break;
+    default:
+        painter->save();
+        drawIcon(painter);   // no SVG for it in the themes (e.g. application menu): Breeze symbol
+        painter->restore();
+        return;
+    }
+
+    const bool active = decoration() && decoration()->window()->isActive();
+    const bool toggledOn = isCheckable() && isChecked() && type() != KDecoration3::DecorationButtonType::Maximize;
+    QString sElement;
+    if (!isEnabled()) {
+        sElement = QStringLiteral("deactivated-center");
+    } else if (isPressed() || toggledOn) {
+        sElement = QStringLiteral("pressed-center");
+    } else if (isHovered()) {
+        sElement = QStringLiteral("hover-center");
+    } else {
+        sElement = active ? QStringLiteral("active-center") : QStringLiteral("inactive-center");
+    }
+
+    static QHash<QString, QSvgRenderer *> renderers;   // one renderer per file, kept for the lifetime of the plugin
+    QSvgRenderer *&renderer = renderers[sFile];
+    if (!renderer) {
+        renderer = new QSvgRenderer(QStringLiteral(":/mkauroraenext/buttons/%1.svg").arg(sFile));
+    }
+    if (renderer->elementExists(sElement)) {
+        renderer->render(painter, sElement, geometry());
     }
 }
 

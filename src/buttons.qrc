@@ -1,0 +1,15 @@
+<!DOCTYPE RCC>
+<RCC version="1.0">
+<!-- Buttons of the mkAurorae themes (identical in all variants), rendered with QSvgRenderer -->
+<qresource prefix="/mkauroraenext">
+    <file>buttons/close.svg</file>
+    <file>buttons/minimize.svg</file>
+    <file>buttons/maximize.svg</file>
+    <file>buttons/restore.svg</file>
+    <file>buttons/help.svg</file>
+    <file>buttons/keepabove.svg</file>
+    <file>buttons/keepbelow.svg</file>
+    <file>buttons/alldesktops.svg</file>
+    <file>buttons/shade.svg</file>
+</qresource>
+</RCC>

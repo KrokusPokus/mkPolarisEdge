@@ -15,6 +15,7 @@ set(breezedecoration_SRCS
 
 ### build library
 kconfig_add_kcfg_files(breezedecoration_SRCS breezesettings.kcfgc)
+qt6_add_resources(breezedecoration_SRCS buttons.qrc)
 add_library(breezedecoration MODULE
     ${breezedecoration_SRCS}
     ${breezedecoration_config_PART_FORMS_HEADERS})
@@ -27,6 +28,7 @@ target_link_libraries(breezedecoration
     PRIVATE
         breezecommon6
         Qt6::DBus
+        Qt6::Svg
         KF6::CoreAddons
         KF6::ConfigGui
         KF6::GuiAddons

@@ -118,7 +118,7 @@ using KDecoration3::ColorRole;
 
 //________________________________________________________________
 static int g_sDecoCount = 0;
-static int g_shadowSizeEnum = InternalSettings::ShadowLarge;
+static int g_shadowSizeEnum = InternalSettings::ShadowNone;
 static int g_shadowStrength = 255;
 static QColor g_shadowColor = Qt::black;
 static std::shared_ptr<KDecoration3::DecorationShadow> g_sShadow;
@@ -170,13 +170,11 @@ QColor Decoration::titleBarColor() const
 //________________________________________________________________
 QColor Decoration::fontColor() const
 {
+    // mkAuroraeNext: ActiveTextColor / InactiveTextColor of the theme
     if (m_animation->state() == QAbstractAnimation::Running) {
-        return KColorUtils::mix(window()->color(ColorGroup::Inactive, ColorRole::Foreground),
-                                window()->color(ColorGroup::Active, ColorRole::Foreground),
-                                m_opacity);
-    } else {
-        return window()->color(window()->isActive() ? ColorGroup::Active : ColorGroup::Inactive, ColorRole::Foreground);
+        return KColorUtils::mix(Theme::Text_Inactive, Theme::Text_Active, m_opacity);
     }
+    return window()->isActive() ? Theme::Text_Active : Theme::Text_Inactive;
 }
 
 //________________________________________________________________
@@ -265,15 +263,8 @@ void Decoration::updateTitleBar()
     // around it (left, right, the strip above) is the resize area, so it is exactly what can be seen: windows
     // snapped edge to edge do not reach into each other, and a window at the top screen edge can still be resized.
     const qreal scale = window()->nextScale();
-    const qreal x = borderLeft();
     const qreal y = isTopEdge() ? 0 : borderSize(false, scale);
-    const qreal width = window()->width();   // the window is the client area; the title bar spans it
-    setTitleBar(QRectF(x, y, width, titleAreaHeight(scale)));
-}
-
-qreal Decoration::titleAreaHeight(qreal scale) const
-{
-    return KDecoration3::snapToPixelGrid(Metrics::TitleBar_EdgeTop + Metrics::TitleBar_Height + Metrics::TitleBar_EdgeBottom, scale);
+    setTitleBar(QRectF(borderLeft(), y, window()->width(), borderTop() - y));
 }
 
 //________________________________________________________________
@@ -346,8 +337,9 @@ QMarginsF Decoration::bordersFor(qreal scale) const
     if (hideTitleBar()) {
         top = bottom;
     } else {
-        // mkAuroraeNext: frame strip above the title bar (resize area) + title area of the mkAurorae themes
-        top = (isTopEdge() ? 0 : borderSize(false, scale)) + titleAreaHeight(scale);
+        // mkAuroraeNext: TitleEdgeTop + button size + TitleEdgeBottom from the outer edge; the frame strip (resize area)
+        // is the top part of it
+        top = KDecoration3::snapToPixelGrid(Metrics::TitleBar_TotalHeight, scale);
     }
     return QMarginsF(left, top, right, bottom);
 }
@@ -409,26 +401,27 @@ void Decoration::updateButtonsGeometryDelayed()
 //________________________________________________________________
 void Decoration::updateButtonsGeometry()
 {
-    // mkAuroraeNext: buttons TitleHeight high, TitleEdgeTop below the top of the title bar, TitleEdgeLeft / TitleEdgeRight
-    // away from the frame, no spacing between them (ButtonSpacing=0 in the mkAurorae themes)
+    // mkAuroraeNext: buttons 20 x 20 (the 22 x 22 button SVGs scaled like Aurorae does), TitleEdgeTop below the outer
+    // edge, the first one TitleEdgeLeft from the outer window edge, the last one TitleEdgeRight before it, no spacing
+    // (ButtonSpacing=0). Note: they reach one pixel into the frame strip above the title bar, as in Aurorae.
     const qreal scale = window()->scale();
     const auto buttonList = m_leftButtons->buttons() + m_rightButtons->buttons();
     for (KDecoration3::DecorationButton *button : buttonList) {
         auto btn = static_cast<Button *>(button);
-        btn->setGeometry(QRectF(QPointF(0, 0), btn->preferredSize()));
+        btn->setGeometry(QRectF(0, 0, Metrics::TitleBar_ButtonSize, Metrics::TitleBar_ButtonSize));
         btn->setPadding(QMargins());
     }
 
-    const qreal y = KDecoration3::snapToPixelGrid(titleBar().top() + Metrics::TitleBar_EdgeTop, scale);
+    const qreal y = KDecoration3::snapToPixelGrid(Metrics::TitleBar_EdgeTop, scale);
 
     if (!m_leftButtons->buttons().isEmpty()) {
         m_leftButtons->setSpacing(0);
-        m_leftButtons->setPos(QPointF(KDecoration3::snapToPixelGrid(borderLeft() + Metrics::TitleBar_EdgeLeft, scale), y));
+        m_leftButtons->setPos(QPointF(KDecoration3::snapToPixelGrid(Metrics::TitleBar_EdgeLeft, scale), y));
     }
 
     if (!m_rightButtons->buttons().isEmpty()) {
         m_rightButtons->setSpacing(0);
-        const qreal x = size().width() - borderRight() - Metrics::TitleBar_EdgeRight - m_rightButtons->geometry().width();
+        const qreal x = size().width() - Metrics::TitleBar_EdgeRight - m_rightButtons->geometry().width();
         m_rightButtons->setPos(QPointF(KDecoration3::snapToPixelGrid(x, scale), y));
     }
 
@@ -438,111 +431,161 @@ void Decoration::updateButtonsGeometry()
 //________________________________________________________________
 void Decoration::paint(QPainter *painter, const QRectF &repaintRegion)
 {
-    // TODO: optimize based on repaintRegion
-    auto s = settings();
-    const bool isTiled = isTopEdge() || isLeftEdge() || isBottomEdge() || isRightEdge();
-    // paint background
-    if (!window()->isShaded()) {
-        painter->fillRect(rect(), Qt::transparent);
-        painter->save();
-        painter->setRenderHint(QPainter::Antialiasing);
-        painter->setPen(Qt::NoPen);
-        painter->setBrush(window()->color(window()->isActive() ? ColorGroup::Active : ColorGroup::Inactive, ColorRole::Frame));
+    // mkAuroraeNext: frame and title background of the mkAurorae themes, piece by piece as in decoration.svg.
+    // Pixel boundaries are integers (logical pixels); only the rounded corners of the active line are antialiased.
+    const bool active = window()->isActive();
+    const qreal W = size().width();
+    const qreal H = size().height();
+    const qreal T = Metrics::TitleBar_TotalHeight;   // 26: separators in rows T - 2 and T - 1
+    const bool framed = !isMaximized();
 
-        // clip away the top part
-        if (!hideTitleBar()) {
-            painter->setClipRect(QRectF(0, borderTop(), size().width(), size().height() - borderTop()), Qt::IntersectClip);
+    painter->save();
+    painter->setPen(Qt::NoPen);
+    painter->setRenderHint(QPainter::Antialiasing, true);
+
+    auto fill = [painter](qreal x, qreal y, qreal w, qreal h, const QBrush &brush) {
+        painter->fillRect(QRectF(x, y, w, h), brush);
+    };
+    auto vertical = [](qreal y1, qreal y2, const QColor &c1, const QColor &c2) {
+        QLinearGradient g(0, y1, 0, y2);
+        g.setColorAt(0, c1);
+        g.setColorAt(1, c2);
+        return QBrush(g);
+    };
+    // rectangle whose corner (0 top left, 1 top right, 2 bottom left, 3 bottom right) is a quarter circle of the given
+    // radius, as the corner paths of decoration.svg ("A 3,3 ..."); the radius may be as large as the rectangle is wide
+    // (QPainterPath::addRoundedRect would limit it to half the width)
+    auto cornerPath = [](const QRectF &r, int corner, qreal radius) {
+        const qreal d = 2 * radius;
+        QPainterPath p;
+        switch (corner) {
+        case 0:
+            p.moveTo(r.left(), r.bottom());
+            p.lineTo(r.left(), r.top() + radius);
+            p.arcTo(QRectF(r.left(), r.top(), d, d), 180, -90);
+            p.lineTo(r.right(), r.top());
+            p.lineTo(r.right(), r.bottom());
+            break;
+        case 1:
+            p.moveTo(r.left(), r.top());
+            p.lineTo(r.right() - radius, r.top());
+            p.arcTo(QRectF(r.right() - d, r.top(), d, d), 90, -90);
+            p.lineTo(r.right(), r.bottom());
+            p.lineTo(r.left(), r.bottom());
+            break;
+        case 2:
+            p.moveTo(r.left(), r.top());
+            p.lineTo(r.right(), r.top());
+            p.lineTo(r.right(), r.bottom());
+            p.lineTo(r.left() + radius, r.bottom());
+            p.arcTo(QRectF(r.left(), r.bottom() - d, d, d), 270, -90);
+            break;
+        default:
+            p.moveTo(r.left(), r.top());
+            p.lineTo(r.right(), r.top());
+            p.lineTo(r.right(), r.bottom() - radius);
+            p.arcTo(QRectF(r.right() - d, r.bottom() - d, d, d), 0, -90);
+            p.lineTo(r.left(), r.bottom());
+            break;
         }
+        p.closeSubpath();
+        return p;
+    };
 
-        if (s->isAlphaChannelSupported()) {
-            if (hasNoBorders() || isTiled) {
-                painter->drawRoundedRect(rect(), 0, 0);
-            } else {
-                painter->drawRoundedRect(rect(), m_scaledCornerRadius, m_scaledCornerRadius);
-            }
+    // title gradient over its area (measured on the Aurorae rendering): active rows 2-23, inactive rows 2-24 (an
+    // inactive window has no separator in row 24)
+    const QBrush titleBrush = active ? vertical(2, T - 2, Theme::Title_Light, Theme::Title_Dark) : vertical(2, T - 1, Theme::Title_Dark, Theme::Title_Light);
+
+    if (!framed) {
+        // decoration-maximized-center: title gradient and the two separator rows, no frame
+        fill(0, 0, W, T - 2, titleBrush);
+        fill(0, T - 2, W, 1, Theme::Separator);
+        fill(0, T - 1, W, 1, Theme::Separator_Active);
+    } else {
+        const QColor line = active ? lineColor() : Theme::Line_Inactive;
+        const bool bold = active && m_internalSettings->frameLineBold();   // inactive windows: the same in both variants
+        const qreal b = bold ? 0 : 1;   // first row / column of the straight line pieces
+
+        // pixel 0: rim; in the top corners a gradient over 26 px, the top row lighter
+        fill(0, 0, W, H, Theme::Rim);
+        fill(4, 0, W - 8, 1, Theme::Rim_Top);
+        fill(0, 0, 4, T, vertical(0, T, Theme::Rim_Top, Theme::Rim));
+        fill(W - 4, 0, 4, T, vertical(0, T, Theme::Rim_Top, Theme::Rim));
+
+        // straight pieces of the line, and pixels 2 and 3 inside it
+        fill(4, b, W - 8, 2 - b, active ? QBrush(line) : QBrush(Theme::Line_InactiveTop));   // top
+        fill(b, T, 4 - b, H - T - 4, line);              // left
+        fill(W - 4, T, 4 - b, H - T - 4, line);          // right
+        fill(4, H - 4, W - 8, 4 - b, line);              // bottom
+        fill(2, T, 2, H - T - 4, Theme::Inner);
+        fill(W - 4, T, 2, H - T - 4, Theme::Inner);
+        fill(4, H - 4, W - 8, 2, Theme::Inner);
+
+        if (active) {
+            // corner pieces: line with outer radius 3, inside radius 2 (1 px also in the bold variant)
+            painter->fillPath(cornerPath(QRectF(1, 1, 3, T - 1), 0, Theme::Corner_OuterRadius), line);
+            painter->fillPath(cornerPath(QRectF(W - 4, 1, 3, T - 1), 1, Theme::Corner_OuterRadius), line);
+            painter->fillPath(cornerPath(QRectF(1, H - 4, 3, 3), 2, Theme::Corner_OuterRadius), line);
+            painter->fillPath(cornerPath(QRectF(W - 4, H - 4, 3, 3), 3, Theme::Corner_OuterRadius), line);
+            painter->fillPath(cornerPath(QRectF(2, 2, 2, T - 4), 0, Theme::Corner_InnerRadius), titleBrush);
+            painter->fillPath(cornerPath(QRectF(W - 4, 2, 2, T - 4), 1, Theme::Corner_InnerRadius), titleBrush);
+            painter->fillPath(cornerPath(QRectF(2, H - 4, 2, 2), 2, Theme::Corner_InnerRadius), Theme::Inner);
+            painter->fillPath(cornerPath(QRectF(W - 4, H - 4, 2, 2), 3, Theme::Corner_InnerRadius), Theme::Inner);
+            fill(2, T - 2, 2, 2, Theme::Inner);
+            fill(W - 4, T - 2, 2, 2, Theme::Inner);
         } else {
-            painter->drawRect(rect());
+            // square corners, the top row of the line lighter
+            fill(1, 1, 3, T - 1, line);
+            fill(W - 4, 1, 3, T - 1, line);
+            fill(1, 1, 3, 1, Theme::Line_InactiveTop);
+            fill(W - 4, 1, 3, 1, Theme::Line_InactiveTop);
+            fill(1, H - 4, 3, 3, line);
+            fill(W - 4, H - 4, 3, 3, line);
+            fill(2, 2, 2, T - 3, titleBrush);
+            fill(W - 4, 2, 2, T - 3, titleBrush);
+            fill(2, T - 1, 2, 1, Theme::Separator_Inactive);
+            fill(W - 4, T - 1, 2, 1, Theme::Separator_Inactive);
+            fill(2, H - 4, 2, 2, Theme::Inner);
+            fill(W - 4, H - 4, 2, 2, Theme::Inner);
         }
 
-        painter->restore();
+        // title gradient and the separator rows between the corner pieces
+        fill(4, 2, W - 8, active ? T - 4 : T - 3, titleBrush);
+        if (active) {
+            fill(4, T - 2, W - 8, 1, Theme::Separator);
+        }
+        fill(4, T - 1, W - 8, 1, active ? Theme::Separator_Active : Theme::Separator_Inactive);
     }
+    painter->restore();
 
     if (!hideTitleBar()) {
         paintTitleBar(painter, repaintRegion);
     }
+}
 
-    if (hasBorders() && !s->isAlphaChannelSupported()) {
-        const QColor borderColor = borderOutline().color();
-        if (borderColor.alphaF() > 0) {
-            painter->save();
-            painter->setRenderHint(QPainter::Antialiasing, false);
-            painter->setBrush(Qt::NoBrush);
-            painter->setPen(borderColor);
-            painter->drawRect(rect().adjusted(0, 0, -1, -1));
-            painter->restore();
-        }
+QColor Decoration::lineColor() const
+{
+    // mkAuroraeNext: the frame line of active windows, the color variants of the mkAurorae themes
+    switch (m_internalSettings->frameLineColor()) {
+    case InternalSettings::LineGray:
+        return Theme::Line_Inactive;
+    case InternalSettings::LineAccent:   // ColorScheme-ViewFocus in the SVG
+        return KColorScheme(QPalette::Active, KColorScheme::View).decoration(KColorScheme::FocusColor).color();
+    case InternalSettings::LineRed:
+        return Theme::Line_Red;
+    default:
+    case InternalSettings::LinePurple:
+        return Theme::Line_Purple;
     }
 }
 
 //________________________________________________________________
 void Decoration::paintTitleBar(QPainter *painter, const QRectF &repaintRegion)
 {
-    QRectF rect(QPointF(0, 0), QSizeF(size().width(), borderTop()));
-    QBrush frontBrush;
-    QBrush backBrush(this->titleBarColor());
-    const bool isTiled = isTopEdge() || isLeftEdge() || isBottomEdge() || isRightEdge();
-
-    if (!rect.intersects(repaintRegion)) {
+    // mkAuroraeNext: the background is drawn in paint(); here only the caption and the buttons
+    if (!QRectF(QPointF(0, 0), QSizeF(size().width(), borderTop())).intersects(repaintRegion)) {
         return;
     }
-
-    painter->save();
-    painter->setPen(Qt::NoPen);
-
-    // render a linear gradient on title area
-    if (window()->isActive() && m_internalSettings->drawBackgroundGradient()) {
-        QLinearGradient gradient(0, 0, 0, rect.height());
-        gradient.setColorAt(0.0, titleBarColor().lighter(120));
-        gradient.setColorAt(0.8, titleBarColor());
-
-        frontBrush = gradient;
-
-    } else {
-        frontBrush = titleBarColor();
-
-        painter->setBrush(titleBarColor());
-    }
-
-    if (isMaximized() || isTiled || !settings()->isAlphaChannelSupported()) {
-        painter->setBrush(backBrush);
-        painter->drawRect(rect);
-
-        painter->setBrush(frontBrush);
-        painter->drawRect(rect);
-    } else if (window()->isShaded()) {
-        painter->setBrush(backBrush);
-        painter->drawRoundedRect(rect, m_scaledCornerRadius, m_scaledCornerRadius);
-
-        painter->setBrush(frontBrush);
-        painter->drawRoundedRect(rect, m_scaledCornerRadius, m_scaledCornerRadius);
-
-    } else {
-        painter->setClipRect(rect, Qt::IntersectClip);
-
-        auto drawThe = [this, painter](const QRectF &r) {
-            painter->drawRoundedRect(r, m_scaledCornerRadius, m_scaledCornerRadius);
-            // remove the rounding on the bottom
-            painter->drawRect(QRectF(r.bottomLeft() - QPointF(0, m_scaledCornerRadius), r.bottomRight()));
-        };
-
-        painter->setBrush(backBrush);
-        drawThe(rect);
-
-        painter->setBrush(frontBrush);
-        drawThe(rect);
-    }
-
-    painter->restore();
 
     // draw caption
     painter->setFont(settings()->font());
@@ -559,15 +602,15 @@ void Decoration::paintTitleBar(QPainter *painter, const QRectF &repaintRegion)
 //________________________________________________________________
 int Decoration::buttonSize() const
 {
-    // mkAuroraeNext: buttons as high as the title (TitleHeight of the mkAurorae themes)
-    return Metrics::TitleBar_Height;
+    // mkAuroraeNext: Aurorae default button size
+    return Metrics::TitleBar_ButtonSize;
 }
 
 //________________________________________________________________
 qreal Decoration::captionHeight() const
 {
-    // mkAuroraeNext: the caption is as high as the title (TitleHeight)
-    return hideTitleBar() ? borderTop() : KDecoration3::snapToPixelGrid(Metrics::TitleBar_Height, window()->scale());
+    // mkAuroraeNext: the caption is centered in the band of the buttons
+    return hideTitleBar() ? borderTop() : KDecoration3::snapToPixelGrid(Metrics::TitleBar_ButtonSize, window()->scale());
 }
 
 //________________________________________________________________
@@ -577,17 +620,17 @@ QPair<QRectF, Qt::Alignment> Decoration::captionRect() const
         return qMakePair(QRectF(), Qt::AlignCenter);
     } else {
         const qreal leftOffset =
-            KDecoration3::snapToPixelGrid(m_leftButtons->buttons().isEmpty() ? Metrics::TitleBar_SideMargin * settings()->smallSpacing()
+            KDecoration3::snapToPixelGrid(m_leftButtons->buttons().isEmpty() ? Metrics::TitleBar_CaptionMargin
                                                                              : m_leftButtons->geometry().x() + m_leftButtons->geometry().width()
-                                                  + Metrics::TitleBar_SideMargin * settings()->smallSpacing(),
+                                                  + Metrics::TitleBar_CaptionMargin,
                                           window()->scale());
 
-        const qreal rightOffset = KDecoration3::snapToPixelGrid(m_rightButtons->buttons().isEmpty() ? Metrics::TitleBar_SideMargin * settings()->smallSpacing()
+        const qreal rightOffset = KDecoration3::snapToPixelGrid(m_rightButtons->buttons().isEmpty() ? Metrics::TitleBar_CaptionMargin
                                                                                                     : size().width() - m_rightButtons->geometry().x()
-                                                                        + Metrics::TitleBar_SideMargin * settings()->smallSpacing(),
+                                                                        + Metrics::TitleBar_CaptionMargin,
                                                                 window()->scale());
 
-        const qreal yOffset = KDecoration3::snapToPixelGrid(titleBar().top() + Metrics::TitleBar_EdgeTop, window()->scale());
+        const qreal yOffset = KDecoration3::snapToPixelGrid(Metrics::TitleBar_EdgeTop, window()->scale());
         const QRectF maxRect(leftOffset, yOffset, size().width() - leftOffset - rightOffset, captionHeight());
 
         switch (m_internalSettings->titleAlignment()) {
