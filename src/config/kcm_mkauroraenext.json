@@ -1,0 +1,14 @@
+{
+    "KPlugin": {
+        "Description": "Modify the appearance of the mkAuroraeNext window decoration",
+        "Description[de]": "Das Erscheinungsbild der Fensterdekoration mkAuroraeNext ändern",
+        "Icon": "preferences-system-windows",
+        "Name": "mkAuroraeNext Window Decoration",
+        "ServiceTypes": [
+            "KCModule"
+        ]
+    },
+    "X-KDE-Keywords": "mkauroraenext,decoration",
+    "X-KDE-ParentApp": "kcontrol",
+    "X-KDE-Weight": 60
+}
