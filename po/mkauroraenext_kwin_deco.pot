@@ -1,0 +1,123 @@
+# Translation template of the mkAuroraeNext window decoration.
+msgid ""
+msgstr ""
+"Project-Id-Version: mkauroraenext\n"
+"POT-Creation-Date: 2026-10-31 09:38\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+
+#: src/config/ui/breezeconfigurationui.ui
+msgid "Appearance"
+msgstr ""
+
+#: src/config/ui/breezeconfigurationui.ui
+msgid "Line color:"
+msgstr ""
+
+#: src/config/ui/breezeconfigurationui.ui
+msgid "Color of the frame line of active windows (the color variants of the mkAurorae themes)"
+msgstr ""
+
+#: src/config/ui/breezeconfigurationui.ui
+msgctxt "@item:inlistbox Line color:"
+msgid "Gray"
+msgstr ""
+
+#: src/config/ui/breezeconfigurationui.ui
+msgctxt "@item:inlistbox Line color:"
+msgid "Accent color"
+msgstr ""
+
+#: src/config/ui/breezeconfigurationui.ui
+msgctxt "@item:inlistbox Line color:"
+msgid "Purple"
+msgstr ""
+
+#: src/config/ui/breezeconfigurationui.ui
+msgctxt "@item:inlistbox Line color:"
+msgid "Red"
+msgstr ""
+
+#: src/config/ui/breezeconfigurationui.ui
+msgctxt "@item:inlistbox Line color:"
+msgid "Custom color"
+msgstr ""
+
+#: src/config/ui/breezeconfigurationui.ui
+msgid "Bold line"
+msgstr ""
+
+#: src/config/ui/breezeconfigurationui.ui
+msgid "2 px frame line, as in the B variants of the mkAurorae themes (the corners stay 1 px)"
+msgstr ""
+
+#: src/config/ui/breezeconfigurationui.ui
+msgid "Title alignment:"
+msgstr ""
+
+#: src/config/ui/breezeconfigurationui.ui
+msgctxt "@item:inlistbox alignment"
+msgid "Left"
+msgstr ""
+
+#: src/config/ui/breezeconfigurationui.ui
+msgctxt "@item:inlistbox alignment"
+msgid "Center"
+msgstr ""
+
+#: src/config/ui/breezeconfigurationui.ui
+msgctxt "@item:inlistbox alignment"
+msgid "Center (Full Width)"
+msgstr ""
+
+#: src/config/ui/breezeconfigurationui.ui
+msgctxt "@item:inlistbox alignment"
+msgid "Right"
+msgstr ""
+
+#: src/config/ui/breezeconfigurationui.ui
+msgid "Shadows"
+msgstr ""
+
+#: src/config/ui/breezeconfigurationui.ui
+msgid "Shadow size:"
+msgstr ""
+
+#: src/config/ui/breezeconfigurationui.ui
+msgctxt "@item:inlistbox Shadow size:"
+msgid "None"
+msgstr ""
+
+#: src/config/ui/breezeconfigurationui.ui
+msgctxt "@item:inlistbox Shadow size:"
+msgid "Small"
+msgstr ""
+
+#: src/config/ui/breezeconfigurationui.ui
+msgctxt "@item:inlistbox Shadow size:"
+msgid "Medium"
+msgstr ""
+
+#: src/config/ui/breezeconfigurationui.ui
+msgctxt "@item:inlistbox Shadow size:"
+msgid "Large"
+msgstr ""
+
+#: src/config/ui/breezeconfigurationui.ui
+msgctxt "@item:inlistbox Shadow size:"
+msgid "Very Large"
+msgstr ""
+
+#: src/config/ui/breezeconfigurationui.ui
+msgctxt "strength of the shadow (from transparent to opaque)"
+msgid "Shadow strength:"
+msgstr ""
+
+#: src/config/ui/breezeconfigurationui.ui
+msgid " %"
+msgstr ""
+
+#: src/config/ui/breezeconfigurationui.ui
+msgid "Shadow color:"
+msgstr ""

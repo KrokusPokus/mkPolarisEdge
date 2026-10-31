@@ -4,6 +4,7 @@
         "Description[de]": "Das Erscheinungsbild der Fensterdekoration mkAuroraeNext ändern",
         "Icon": "preferences-system-windows",
         "Name": "mkAuroraeNext Window Decoration",
+        "Name[de]": "Fensterdekoration mkAuroraeNext",
         "ServiceTypes": [
             "KCModule"
         ]

@@ -35,4 +35,7 @@ find_package(KDecoration3 REQUIRED)
 add_subdirectory(common)
 add_subdirectory(src)
 
+# translations: po/<language>/mkauroraenext_kwin_deco.po (template: tools/extract-messages.py)
+ki18n_install(po)
+
 feature_summary(WHAT ALL INCLUDE_QUIET_PACKAGES FATAL_ON_MISSING_REQUIRED_PACKAGES)
