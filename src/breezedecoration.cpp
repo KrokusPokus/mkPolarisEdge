@@ -423,24 +423,25 @@ void Decoration::paint(QPainter *painter, const QRectF &repaintRegion)
         g.setColorAt(1, c2);
         return QBrush(g);
     };
-    // rectangle whose corner (0 top left, 1 top right, 2 bottom left, 3 bottom right) is a quarter circle of the given
-    // radius, as the corner paths of decoration.svg ("A 3,3 ..."); the radius may be as large as the rectangle is wide
+    // rectangle whose corner (0 top left, 1 top right, 2 bottom left, 3 bottom right) is a quarter ellipse with the
+    // radii rx, ry, as the corner paths of decoration.svg ("A 3,3 ..."); a radius may be as large as the rectangle
     // (QPainterPath::addRoundedRect would limit it to half the width)
-    auto cornerPath = [](const QRectF &r, int corner, qreal radius) {
-        const qreal d = 2 * radius;
+    auto cornerPath = [](const QRectF &r, int corner, qreal rx, qreal ry) {
+        const qreal dx = 2 * rx;
+        const qreal dy = 2 * ry;
         QPainterPath p;
         switch (corner) {
         case 0:
             p.moveTo(r.left(), r.bottom());
-            p.lineTo(r.left(), r.top() + radius);
-            p.arcTo(QRectF(r.left(), r.top(), d, d), 180, -90);
+            p.lineTo(r.left(), r.top() + ry);
+            p.arcTo(QRectF(r.left(), r.top(), dx, dy), 180, -90);
             p.lineTo(r.right(), r.top());
             p.lineTo(r.right(), r.bottom());
             break;
         case 1:
             p.moveTo(r.left(), r.top());
-            p.lineTo(r.right() - radius, r.top());
-            p.arcTo(QRectF(r.right() - d, r.top(), d, d), 90, -90);
+            p.lineTo(r.right() - rx, r.top());
+            p.arcTo(QRectF(r.right() - dx, r.top(), dx, dy), 90, -90);
             p.lineTo(r.right(), r.bottom());
             p.lineTo(r.left(), r.bottom());
             break;
@@ -448,14 +449,14 @@ void Decoration::paint(QPainter *painter, const QRectF &repaintRegion)
             p.moveTo(r.left(), r.top());
             p.lineTo(r.right(), r.top());
             p.lineTo(r.right(), r.bottom());
-            p.lineTo(r.left() + radius, r.bottom());
-            p.arcTo(QRectF(r.left(), r.bottom() - d, d, d), 270, -90);
+            p.lineTo(r.left() + rx, r.bottom());
+            p.arcTo(QRectF(r.left(), r.bottom() - dy, dx, dy), 270, -90);
             break;
         default:
             p.moveTo(r.left(), r.top());
             p.lineTo(r.right(), r.top());
-            p.lineTo(r.right(), r.bottom() - radius);
-            p.arcTo(QRectF(r.right() - d, r.bottom() - d, d, d), 0, -90);
+            p.lineTo(r.right(), r.bottom() - ry);
+            p.arcTo(QRectF(r.right() - dx, r.bottom() - dy, dx, dy), 0, -90);
             p.lineTo(r.left(), r.bottom());
             break;
         }
@@ -494,15 +495,20 @@ void Decoration::paint(QPainter *painter, const QRectF &repaintRegion)
         fill(4, H - 4, W - 8, 2, Theme::Inner);
 
         if (highlight) {
-            // corner pieces: line with outer radius 3, inside radius 2 (1 px also in the bold variant)
-            painter->fillPath(cornerPath(QRectF(1, 1, 3, T - 1), 0, Theme::Corner_OuterRadius), line);
-            painter->fillPath(cornerPath(QRectF(W - 4, 1, 3, T - 1), 1, Theme::Corner_OuterRadius), line);
-            painter->fillPath(cornerPath(QRectF(1, H - 4, 3, 3), 2, Theme::Corner_OuterRadius), line);
-            painter->fillPath(cornerPath(QRectF(W - 4, H - 4, 3, 3), 3, Theme::Corner_OuterRadius), line);
-            painter->fillPath(cornerPath(QRectF(2, 2, 2, T - 4), 0, Theme::Corner_InnerRadius), titleBrush);
-            painter->fillPath(cornerPath(QRectF(W - 4, 2, 2, T - 4), 1, Theme::Corner_InnerRadius), titleBrush);
-            painter->fillPath(cornerPath(QRectF(2, H - 4, 2, 2), 2, Theme::Corner_InnerRadius), Theme::Inner);
-            painter->fillPath(cornerPath(QRectF(W - 4, H - 4, 2, 2), 3, Theme::Corner_InnerRadius), Theme::Inner);
+            // corner pieces: line with outer radius 3, inside radius 2. The bold variant scales the line pieces of
+            // decoration.svg to the outer edge: 4 px wide, radius 4 (top corners: 4 x 3.12, scaled by 1.04 vertically)
+            const qreal o = bold ? 0 : 1;   // outer edge of the corner line pieces
+            const qreal rx = bold ? Theme::Corner_OuterRadiusBold : Theme::Corner_OuterRadius;
+            const qreal ryTop = bold ? Theme::Corner_OuterRadiusBoldTop : Theme::Corner_OuterRadius;
+            painter->fillPath(cornerPath(QRectF(o, o, 4 - o, T - o), 0, rx, ryTop), line);
+            painter->fillPath(cornerPath(QRectF(W - 4, o, 4 - o, T - o), 1, rx, ryTop), line);
+            painter->fillPath(cornerPath(QRectF(o, H - 4, 4 - o, 4 - o), 2, rx, rx), line);
+            painter->fillPath(cornerPath(QRectF(W - 4, H - 4, 4 - o, 4 - o), 3, rx, rx), line);
+            const qreal ri = Theme::Corner_InnerRadius;
+            painter->fillPath(cornerPath(QRectF(2, 2, 2, T - 4), 0, ri, ri), titleBrush);
+            painter->fillPath(cornerPath(QRectF(W - 4, 2, 2, T - 4), 1, ri, ri), titleBrush);
+            painter->fillPath(cornerPath(QRectF(2, H - 4, 2, 2), 2, ri, ri), Theme::Inner);
+            painter->fillPath(cornerPath(QRectF(W - 4, H - 4, 2, 2), 3, ri, ri), Theme::Inner);
         } else {
             // square corners, the top row of the line lighter
             fill(1, 1, 3, T - 1, line);
