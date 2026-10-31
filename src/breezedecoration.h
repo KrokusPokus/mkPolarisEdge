@@ -109,6 +109,8 @@ private:
     //*@name border size
     //@{
     qreal borderSize(bool bottom, qreal scale) const;
+    //* mkAuroraeNext: height of the title area (edges above and below plus the title), snapped to the pixel grid
+    qreal titleAreaHeight(qreal scale) const;
     inline bool hasBorders() const;
     inline bool hasNoBorders() const;
     inline bool hasNoSideBorders() const;

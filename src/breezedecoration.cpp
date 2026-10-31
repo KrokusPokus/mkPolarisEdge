@@ -261,14 +261,19 @@ bool Decoration::init()
 //________________________________________________________________
 void Decoration::updateTitleBar()
 {
-    // The titlebar rect has margins around it so the window can be resized by dragging a decoration edge.
-    auto s = settings();
-    const bool maximized = isMaximized();
-    const qreal width = maximized ? window()->width() : window()->width() - 2 * s->smallSpacing() * Metrics::TitleBar_SideMargin;
-    const qreal height = (maximized || isTopEdge()) ? borderTop() : borderTop() - s->smallSpacing() * Metrics::TitleBar_TopMargin;
-    const qreal x = maximized ? 0 : s->smallSpacing() * Metrics::TitleBar_SideMargin;
-    const qreal y = (maximized || isTopEdge()) ? 0 : s->smallSpacing() * Metrics::TitleBar_TopMargin;
-    setTitleBar(QRectF(x, y, width, height));
+    // mkAuroraeNext: the title bar (move area) is everything of the decoration inside the visible frame. The frame
+    // around it (left, right, the strip above) is the resize area, so it is exactly what can be seen: windows
+    // snapped edge to edge do not reach into each other, and a window at the top screen edge can still be resized.
+    const qreal scale = window()->nextScale();
+    const qreal x = borderLeft();
+    const qreal y = isTopEdge() ? 0 : borderSize(false, scale);
+    const qreal width = window()->width();   // the window is the client area; the title bar spans it
+    setTitleBar(QRectF(x, y, width, titleAreaHeight(scale)));
+}
+
+qreal Decoration::titleAreaHeight(qreal scale) const
+{
+    return KDecoration3::snapToPixelGrid(Metrics::TitleBar_EdgeTop + Metrics::TitleBar_Height + Metrics::TitleBar_EdgeBottom, scale);
 }
 
 //________________________________________________________________
@@ -299,73 +304,9 @@ void Decoration::updateAnimationState()
 //________________________________________________________________
 qreal Decoration::borderSize(bool bottom, qreal scale) const
 {
-    if (style() == KDecoration3::Style::Shadow) {
-        return 0;
-    }
-
-    const qreal pixelSize = KDecoration3::pixelSize(scale);
-    const qreal baseSize = std::max<qreal>(pixelSize, KDecoration3::snapToPixelGrid(settings()->smallSpacing(), scale));
-    if (m_internalSettings && (m_internalSettings->mask() & BorderSize)) {
-        switch (m_internalSettings->borderSize()) {
-        case InternalSettings::BorderNone:
-            return 0;
-        case InternalSettings::BorderNoSides:
-            if (bottom) {
-                return KDecoration3::snapToPixelGrid(std::max(4.0, baseSize + Metrics::Frame_FrameRadius), scale);
-            } else {
-                return 0;
-            }
-        default:
-        case InternalSettings::BorderTiny:
-            if (bottom) {
-                return KDecoration3::snapToPixelGrid(std::max(4.0, baseSize), scale);
-            } else {
-                return baseSize;
-            }
-        case InternalSettings::BorderNormal:
-            return baseSize * 2;
-        case InternalSettings::BorderLarge:
-            return baseSize * 3;
-        case InternalSettings::BorderVeryLarge:
-            return baseSize * 4;
-        case InternalSettings::BorderHuge:
-            return baseSize * 5;
-        case InternalSettings::BorderVeryHuge:
-            return baseSize * 6;
-        case InternalSettings::BorderOversized:
-            return baseSize * 10;
-        }
-    } else {
-        switch (settings()->borderSize()) {
-        case KDecoration3::BorderSize::None:
-            return 0;
-        case KDecoration3::BorderSize::NoSides:
-            if (bottom) {
-                return KDecoration3::snapToPixelGrid(std::max(4.0, baseSize + Metrics::Frame_FrameRadius), scale);
-            } else {
-                return 0;
-            }
-        default:
-        case KDecoration3::BorderSize::Tiny:
-            if (bottom) {
-                return KDecoration3::snapToPixelGrid(std::max(4.0, baseSize), scale);
-            } else {
-                return baseSize;
-            }
-        case KDecoration3::BorderSize::Normal:
-            return baseSize * 2;
-        case KDecoration3::BorderSize::Large:
-            return baseSize * 3;
-        case KDecoration3::BorderSize::VeryLarge:
-            return baseSize * 4;
-        case KDecoration3::BorderSize::Huge:
-            return baseSize * 5;
-        case KDecoration3::BorderSize::VeryHuge:
-            return baseSize * 6;
-        case KDecoration3::BorderSize::Oversized:
-            return baseSize * 10;
-        }
-    }
+    // mkAuroraeNext: the frame of the mkAurorae themes, independent of the border size setting of KWin
+    Q_UNUSED(bottom);
+    return KDecoration3::snapToPixelGrid(Metrics::Frame_BorderWidth, scale);
 }
 
 //________________________________________________________________
@@ -405,15 +346,8 @@ QMarginsF Decoration::bordersFor(qreal scale) const
     if (hideTitleBar()) {
         top = bottom;
     } else {
-        QFontMetrics fm(settings()->font());
-        top += KDecoration3::snapToPixelGrid(std::max(fm.height(), buttonSize()), scale);
-
-        // padding below
-        const int baseSize = settings()->smallSpacing();
-        top += KDecoration3::snapToPixelGrid(baseSize * Metrics::TitleBar_BottomMargin, scale);
-
-        // padding above
-        top += KDecoration3::snapToPixelGrid(baseSize * Metrics::TitleBar_TopMargin, scale);
+        // mkAuroraeNext: frame strip above the title bar (resize area) + title area of the mkAurorae themes
+        top = (isTopEdge() ? 0 : borderSize(false, scale)) + titleAreaHeight(scale);
     }
     return QMarginsF(left, top, right, bottom);
 }
@@ -422,27 +356,8 @@ void Decoration::recalculateBorders()
 {
     setBorders(bordersFor(window()->nextScale()));
 
-    // extended sizes
-    const qreal extSize = KDecoration3::snapToPixelGrid(settings()->largeSpacing(), window()->nextScale());
-    qreal extTop = 0;
-    if (!isMaximizedVertically()) {
-        extTop = extSize;
-    }
-    qreal extSides = 0;
-    qreal extBottom = 0;
-    if (hasNoBorders()) {
-        if (!isMaximizedHorizontally()) {
-            extSides = extSize;
-        }
-        if (!isMaximizedVertically()) {
-            extBottom = extSize;
-        }
-
-    } else if (hasNoSideBorders() && !isMaximizedHorizontally()) {
-        extSides = extSize;
-    }
-
-    setResizeOnlyBorders(QMarginsF(extSides, extTop, extSides, extBottom));
+    // mkAuroraeNext: no resize area outside of the visible frame (Breeze extends it by largeSpacing)
+    setResizeOnlyBorders(QMarginsF());
 
     const bool isTiled = isTopEdge() || isLeftEdge() || isBottomEdge() || isRightEdge();
 
@@ -472,28 +387,9 @@ void Decoration::recalculateBorders()
     }
     setBorderRadius(KDecoration3::BorderRadius(topLeftRadius, topRightRadius, bottomRightRadius, bottomLeftRadius));
 
-    if (isMaximized() || !outlinesEnabled()) {
-        setBorderOutline(KDecoration3::BorderOutline());
-    } else {
-        const auto color = KColorUtils::mix(window()->color(window()->isActive() ? ColorGroup::Active : ColorGroup::Inactive, ColorRole::Frame),
-                                            window()->palette().text().color(),
-                                            KColorScheme::frameContrast());
-        const qreal thickness = std::max(KDecoration3::pixelSize(window()->nextScale()), KDecoration3::snapToPixelGrid(1, window()->nextScale()));
-
-        qreal topLeftRightRadius = 0;
-        qreal bottomLeftRadius = 0;
-        qreal bottomRightRadius = 0;
-        if (!isTiled && (!hideTitleBar() || m_internalSettings->roundedCorners())) {
-            topLeftRightRadius = m_scaledCornerRadius;
-        }
-        if (!isTiled && (!hasNoBorders() || m_internalSettings->roundedCorners())) {
-            bottomLeftRadius = m_scaledCornerRadius;
-            bottomRightRadius = m_scaledCornerRadius;
-        }
-
-        const auto radius = KDecoration3::BorderRadius(topLeftRightRadius, topLeftRightRadius, bottomRightRadius, bottomLeftRadius);
-        setBorderOutline(KDecoration3::BorderOutline(thickness, color, radius));
-    }
+    // mkAuroraeNext: no outline. KWin draws it outside of the decoration, where it would be visible but not a resize
+    // area; the frame of the mkAurorae themes has its colored edge inside the 4 px border.
+    setBorderOutline(KDecoration3::BorderOutline());
 }
 
 //________________________________________________________________
@@ -513,68 +409,27 @@ void Decoration::updateButtonsGeometryDelayed()
 //________________________________________________________________
 void Decoration::updateButtonsGeometry()
 {
-    const auto s = settings();
-
-    // adjust button position
+    // mkAuroraeNext: buttons TitleHeight high, TitleEdgeTop below the top of the title bar, TitleEdgeLeft / TitleEdgeRight
+    // away from the frame, no spacing between them (ButtonSpacing=0 in the mkAurorae themes)
+    const qreal scale = window()->scale();
     const auto buttonList = m_leftButtons->buttons() + m_rightButtons->buttons();
     for (KDecoration3::DecorationButton *button : buttonList) {
         auto btn = static_cast<Button *>(button);
-
-        const int verticalOffset = (isTopEdge() ? s->smallSpacing() * Metrics::TitleBar_TopMargin : 0);
-
-        const QSizeF preferredSize = btn->preferredSize();
-        const int bHeight = preferredSize.height() + verticalOffset;
-        const int bWidth = preferredSize.width();
-
-        btn->setGeometry(QRectF(QPoint(0, 0), QSizeF(bWidth, bHeight)));
-        btn->setPadding(QMargins(0, verticalOffset, 0, 0));
+        btn->setGeometry(QRectF(QPointF(0, 0), btn->preferredSize()));
+        btn->setPadding(QMargins());
     }
 
-    // left buttons
+    const qreal y = KDecoration3::snapToPixelGrid(titleBar().top() + Metrics::TitleBar_EdgeTop, scale);
+
     if (!m_leftButtons->buttons().isEmpty()) {
-        // spacing
-        m_leftButtons->setSpacing(s->smallSpacing() * Metrics::TitleBar_ButtonSpacing);
-
-        // padding
-        const int vPadding = isTopEdge() ? 0 : s->smallSpacing() * Metrics::TitleBar_TopMargin;
-        const int hPadding = s->smallSpacing() * Metrics::TitleBar_SideMargin;
-        if (isLeftEdge()) {
-            // add offsets on the side buttons, to preserve padding, but satisfy Fitts law
-            auto button = static_cast<Button *>(m_leftButtons->buttons().front());
-
-            QRectF geometry = button->geometry();
-            geometry.adjust(-hPadding, 0, 0, 0);
-            button->setGeometry(geometry);
-            button->setLeftPadding(hPadding);
-
-            m_leftButtons->setPos(QPointF(0, vPadding));
-
-        } else {
-            m_leftButtons->setPos(QPointF(hPadding + borderLeft(), vPadding));
-        }
+        m_leftButtons->setSpacing(0);
+        m_leftButtons->setPos(QPointF(KDecoration3::snapToPixelGrid(borderLeft() + Metrics::TitleBar_EdgeLeft, scale), y));
     }
 
-    // right buttons
     if (!m_rightButtons->buttons().isEmpty()) {
-        // spacing
-        m_rightButtons->setSpacing(s->smallSpacing() * Metrics::TitleBar_ButtonSpacing);
-
-        // padding
-        const int vPadding = isTopEdge() ? 0 : s->smallSpacing() * Metrics::TitleBar_TopMargin;
-        const int hPadding = s->smallSpacing() * Metrics::TitleBar_SideMargin;
-        if (isRightEdge()) {
-            auto button = static_cast<Button *>(m_rightButtons->buttons().back());
-
-            QRectF geometry = button->geometry();
-            geometry.adjust(0, 0, hPadding, 0);
-            button->setGeometry(geometry);
-            button->setRightPadding(hPadding);
-
-            m_rightButtons->setPos(QPointF(size().width() - m_rightButtons->geometry().width(), vPadding));
-
-        } else {
-            m_rightButtons->setPos(QPointF(size().width() - m_rightButtons->geometry().width() - hPadding - borderRight(), vPadding));
-        }
+        m_rightButtons->setSpacing(0);
+        const qreal x = size().width() - borderRight() - Metrics::TitleBar_EdgeRight - m_rightButtons->geometry().width();
+        m_rightButtons->setPos(QPointF(KDecoration3::snapToPixelGrid(x, scale), y));
     }
 
     update();
@@ -704,26 +559,15 @@ void Decoration::paintTitleBar(QPainter *painter, const QRectF &repaintRegion)
 //________________________________________________________________
 int Decoration::buttonSize() const
 {
-    const int baseSize = settings()->gridUnit();
-    switch (m_internalSettings->buttonSize()) {
-    case InternalSettings::ButtonTiny:
-        return baseSize;
-    case InternalSettings::ButtonSmall:
-        return baseSize * 1.5;
-    default:
-    case InternalSettings::ButtonDefault:
-        return baseSize * 2;
-    case InternalSettings::ButtonLarge:
-        return baseSize * 2.5;
-    case InternalSettings::ButtonVeryLarge:
-        return baseSize * 3.5;
-    }
+    // mkAuroraeNext: buttons as high as the title (TitleHeight of the mkAurorae themes)
+    return Metrics::TitleBar_Height;
 }
 
 //________________________________________________________________
 qreal Decoration::captionHeight() const
 {
-    return hideTitleBar() ? borderTop() : borderTop() - settings()->smallSpacing() * (Metrics::TitleBar_BottomMargin + Metrics::TitleBar_TopMargin);
+    // mkAuroraeNext: the caption is as high as the title (TitleHeight)
+    return hideTitleBar() ? borderTop() : KDecoration3::snapToPixelGrid(Metrics::TitleBar_Height, window()->scale());
 }
 
 //________________________________________________________________
@@ -743,7 +587,7 @@ QPair<QRectF, Qt::Alignment> Decoration::captionRect() const
                                                                         + Metrics::TitleBar_SideMargin * settings()->smallSpacing(),
                                                                 window()->scale());
 
-        const qreal yOffset = KDecoration3::snapToPixelGrid(settings()->smallSpacing() * Metrics::TitleBar_TopMargin, window()->scale());
+        const qreal yOffset = KDecoration3::snapToPixelGrid(titleBar().top() + Metrics::TitleBar_EdgeTop, window()->scale());
         const QRectF maxRect(leftOffset, yOffset, size().width() - leftOffset - rightOffset, captionHeight());
 
         switch (m_internalSettings->titleAlignment()) {

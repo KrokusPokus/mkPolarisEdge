@@ -34,6 +34,15 @@ static constexpr int TitleBar_BottomMargin = 2;
 static constexpr int TitleBar_SideMargin = 2;
 static constexpr int TitleBar_ButtonSpacing = 2;
 
+//* mkAuroraeNext: geometry of the mkAurorae themes (logical pixels, decoration.svg and the theme rc file).
+// The resize area is exactly the visible frame: there are no resize borders outside of it.
+static constexpr int Frame_BorderWidth = 4;     // left, right, bottom and the strip above the title bar
+static constexpr int TitleBar_EdgeTop = 3;      // TitleEdgeTop
+static constexpr int TitleBar_Height = 16;      // TitleHeight: height of buttons and caption
+static constexpr int TitleBar_EdgeBottom = 3;   // TitleEdgeBottom
+static constexpr int TitleBar_EdgeLeft = 10;    // TitleEdgeLeft: from the frame to the left buttons
+static constexpr int TitleBar_EdgeRight = 5;    // TitleEdgeRight: from the right buttons to the frame
+
 // shadow dimensions (pixels)
 static constexpr int Shadow_Overlap = 3;
 
