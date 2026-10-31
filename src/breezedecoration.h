@@ -81,7 +81,6 @@ public:
     inline bool isTopEdge() const;
     inline bool isBottomEdge() const;
 
-    inline bool hideTitleBar() const;
     //@}
 
 public Q_SLOTS:
@@ -111,13 +110,9 @@ private:
     qreal borderSize(bool bottom, qreal scale) const;
     //* mkAuroraeNext: color of the frame line of active windows (setting FrameLineColor)
     QColor lineColor() const;
-    inline bool hasBorders() const;
-    inline bool hasNoBorders() const;
-    inline bool hasNoSideBorders() const;
     QMarginsF bordersFor(qreal scale) const;
     //@}
 
-    inline bool outlinesEnabled() const;
 
     InternalSettingsPtr m_internalSettings;
     KDecoration3::DecorationButtonGroup *m_leftButtons = nullptr;
@@ -135,78 +130,38 @@ private:
     qreal m_scaledCornerRadius = 3;
 };
 
-bool Decoration::hasBorders() const
-{
-    if (m_internalSettings && m_internalSettings->mask() & BorderSize) {
-        return m_internalSettings->borderSize() > InternalSettings::BorderNoSides;
-    } else {
-        return settings()->borderSize() > KDecoration3::BorderSize::NoSides;
-    }
-}
-
-bool Decoration::hasNoBorders() const
-{
-    if (m_internalSettings && m_internalSettings->mask() & BorderSize) {
-        return m_internalSettings->borderSize() == InternalSettings::BorderNone;
-    } else {
-        return settings()->borderSize() == KDecoration3::BorderSize::None;
-    }
-}
-
-bool Decoration::hasNoSideBorders() const
-{
-    if (m_internalSettings && m_internalSettings->mask() & BorderSize) {
-        return m_internalSettings->borderSize() == InternalSettings::BorderNoSides;
-    } else {
-        return settings()->borderSize() == KDecoration3::BorderSize::NoSides;
-    }
-}
-
 bool Decoration::isMaximized() const
 {
-    return window()->isMaximized() && !m_internalSettings->drawBorderOnMaximizedWindows();
+    return window()->isMaximized();
 }
 
 bool Decoration::isMaximizedHorizontally() const
 {
-    return window()->isMaximizedHorizontally() && !m_internalSettings->drawBorderOnMaximizedWindows();
+    return window()->isMaximizedHorizontally();
 }
 
 bool Decoration::isMaximizedVertically() const
 {
-    return window()->isMaximizedVertically() && !m_internalSettings->drawBorderOnMaximizedWindows();
+    return window()->isMaximizedVertically();
 }
 
 bool Decoration::isLeftEdge() const
 {
-    return (window()->isMaximizedHorizontally() || window()->adjacentScreenEdges().testFlag(Qt::LeftEdge))
-        && !m_internalSettings->drawBorderOnMaximizedWindows();
+    return window()->isMaximizedHorizontally() || window()->adjacentScreenEdges().testFlag(Qt::LeftEdge);
 }
 
 bool Decoration::isRightEdge() const
 {
-    return (window()->isMaximizedHorizontally() || window()->adjacentScreenEdges().testFlag(Qt::RightEdge))
-        && !m_internalSettings->drawBorderOnMaximizedWindows();
+    return window()->isMaximizedHorizontally() || window()->adjacentScreenEdges().testFlag(Qt::RightEdge);
 }
 
 bool Decoration::isTopEdge() const
 {
-    return (window()->isMaximizedVertically() || window()->adjacentScreenEdges().testFlag(Qt::TopEdge)) && !m_internalSettings->drawBorderOnMaximizedWindows();
+    return window()->isMaximizedVertically() || window()->adjacentScreenEdges().testFlag(Qt::TopEdge);
 }
 
 bool Decoration::isBottomEdge() const
 {
-    return (window()->isMaximizedVertically() || window()->adjacentScreenEdges().testFlag(Qt::BottomEdge))
-        && !m_internalSettings->drawBorderOnMaximizedWindows();
-}
-
-bool Decoration::hideTitleBar() const
-{
-    return style() == KDecoration3::Style::Shadow || (m_internalSettings->hideTitleBar() && !window()->isShaded());
-}
-
-bool Decoration::outlinesEnabled() const
-{
-    return m_internalSettings->outlineEnabled();
+    return window()->isMaximizedVertically() || window()->adjacentScreenEdges().testFlag(Qt::BottomEdge);
 }
 }

@@ -1,16 +1,8 @@
 set(breezedecoration_config_SRCS
-    ../breezeexceptionlist.cpp
     breezeconfigwidget.cpp
-    breezedetectwidget.cpp
-    breezeexceptiondialog.cpp
-    breezeexceptionlistwidget.cpp
-    breezeexceptionmodel.cpp
-    breezeitemmodel.cpp
 )
 ki18n_wrap_ui(breezedecoration_config_SRCS
    ui/breezeconfigurationui.ui
-   ui/breezeexceptiondialog.ui
-   ui/breezeexceptionlistwidget.ui
 )
 
 kcoreaddons_add_plugin(kcm_mkauroraenext SOURCES kcm_mkauroraenext.cpp ${breezedecoration_config_SRCS} INSTALL_NAMESPACE "${KDECORATION_KCM_PLUGIN_DIR}")

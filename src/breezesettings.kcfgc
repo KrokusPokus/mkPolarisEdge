@@ -4,4 +4,3 @@ NameSpace=MkAuroraeNext
 Singleton=false
 Mutators=true
 GlobalEnums=true
-Notifiers=OutlineCloseButton

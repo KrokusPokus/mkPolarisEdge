@@ -10,7 +10,6 @@
 #pragma once
 
 #include "breeze.h"
-#include "breezeexceptionlistwidget.h"
 #include "breezesettings.h"
 #include "ui_breezeconfigurationui.h"
 
@@ -49,13 +48,20 @@ protected Q_SLOTS:
     virtual void updateChanged();
 
 private:
+    //* show the custom color button only for the custom line color
+    void updateCustomColorVisibility();
+
+    //* assigns the settings to the ui
+    void setUi(const InternalSettings &settings);
+
+private:
     //* ui
     Ui_BreezeConfigurationUI m_ui;
 
     //* kconfiguration object
     KSharedConfig::Ptr m_configuration;
 
-    //* internal exception
+    //* settings as loaded or saved last
     InternalSettingsPtr m_internalSettings;
 
     //* changed state

@@ -42,9 +42,6 @@ private:
     //* default configuration
     InternalSettingsPtr m_defaultSettings;
 
-    //* exceptions
-    InternalSettingsList m_exceptions;
-
     //* config object
     KSharedConfigPtr m_config;
 

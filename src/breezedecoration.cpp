@@ -156,9 +156,7 @@ void Decoration::setOpacity(qreal value)
 //________________________________________________________________
 QColor Decoration::titleBarColor() const
 {
-    if (hideTitleBar()) {
-        return window()->color(ColorGroup::Inactive, ColorRole::TitleBar);
-    } else if (m_animation->state() == QAbstractAnimation::Running) {
+    if (m_animation->state() == QAbstractAnimation::Running) {
         return KColorUtils::mix(window()->color(ColorGroup::Inactive, ColorRole::TitleBar),
                                 window()->color(ColorGroup::Active, ColorRole::TitleBar),
                                 m_opacity);
@@ -333,14 +331,9 @@ QMarginsF Decoration::bordersFor(qreal scale) const
     const qreal right = isRightEdge() ? 0 : borderSize(false, scale);
     const qreal bottom = (window()->isShaded() || isBottomEdge()) ? 0 : borderSize(true, scale);
 
-    qreal top = 0;
-    if (hideTitleBar()) {
-        top = bottom;
-    } else {
-        // mkAuroraeNext: TitleEdgeTop + button size + TitleEdgeBottom from the outer edge; the frame strip (resize area)
-        // is the top part of it
-        top = KDecoration3::snapToPixelGrid(isMaximized() ? Metrics::TitleBar_TotalHeightMaximized : Metrics::TitleBar_TotalHeight, scale);
-    }
+    // mkAuroraeNext: TitleEdgeTop + button size + TitleEdgeBottom from the outer edge; the frame strip (resize area)
+    // is the top part of it
+    const qreal top = KDecoration3::snapToPixelGrid(isMaximized() ? Metrics::TitleBar_TotalHeightMaximized : Metrics::TitleBar_TotalHeight, scale);
     return QMarginsF(left, top, right, bottom);
 }
 
@@ -351,33 +344,8 @@ void Decoration::recalculateBorders()
     // mkAuroraeNext: no resize area outside of the visible frame (Breeze extends it by largeSpacing)
     setResizeOnlyBorders(QMarginsF());
 
-    const bool isTiled = isTopEdge() || isLeftEdge() || isBottomEdge() || isRightEdge();
-
-    qreal topLeftRadius = 0;
-    qreal topRightRadius = 0;
-    qreal bottomLeftRadius = 0;
-    qreal bottomRightRadius = 0;
-    if (!isTiled && hasNoBorders() && m_internalSettings->roundedCorners()) {
-        if (!isBottomEdge()) {
-            if (!isLeftEdge()) {
-                bottomLeftRadius = m_scaledCornerRadius;
-            }
-            if (!isRightEdge()) {
-                bottomRightRadius = m_scaledCornerRadius;
-            }
-        }
-        if (hideTitleBar()) {
-            if (!isTopEdge()) {
-                if (!isLeftEdge()) {
-                    topLeftRadius = m_scaledCornerRadius;
-                }
-                if (!isRightEdge()) {
-                    topRightRadius = m_scaledCornerRadius;
-                }
-            }
-        }
-    }
-    setBorderRadius(KDecoration3::BorderRadius(topLeftRadius, topRightRadius, bottomRightRadius, bottomLeftRadius));
+    // mkAuroraeNext: the window is rectangular, the frame is always there (Breeze rounds windows without borders)
+    setBorderRadius(KDecoration3::BorderRadius());
 
     // mkAuroraeNext: no outline. KWin draws it outside of the decoration, where it would be visible but not a resize
     // area; the frame of the mkAurorae themes has its colored edge inside the 4 px border.
@@ -559,9 +527,7 @@ void Decoration::paint(QPainter *painter, const QRectF &repaintRegion)
     }
     painter->restore();
 
-    if (!hideTitleBar()) {
-        paintTitleBar(painter, repaintRegion);
-    }
+    paintTitleBar(painter, repaintRegion);
 }
 
 QColor Decoration::lineColor() const
@@ -574,6 +540,8 @@ QColor Decoration::lineColor() const
         return KColorScheme(QPalette::Active, KColorScheme::View).decoration(KColorScheme::FocusColor).color();
     case InternalSettings::LineRed:
         return Theme::Line_Red;
+    case InternalSettings::LineCustom:
+        return m_internalSettings->frameLineCustomColor();
     default:
     case InternalSettings::LinePurple:
         return Theme::Line_Purple;
@@ -611,15 +579,13 @@ int Decoration::buttonSize() const
 qreal Decoration::captionHeight() const
 {
     // mkAuroraeNext: the caption is centered in the band of the buttons
-    return hideTitleBar() ? borderTop() : KDecoration3::snapToPixelGrid(Metrics::TitleBar_ButtonSize, window()->scale());
+    return KDecoration3::snapToPixelGrid(Metrics::TitleBar_ButtonSize, window()->scale());
 }
 
 //________________________________________________________________
 QPair<QRectF, Qt::Alignment> Decoration::captionRect() const
 {
-    if (hideTitleBar()) {
-        return qMakePair(QRectF(), Qt::AlignCenter);
-    } else {
+    {
         const qreal leftOffset =
             KDecoration3::snapToPixelGrid(m_leftButtons->buttons().isEmpty() ? Metrics::TitleBar_CaptionMargin
                                                                              : m_leftButtons->geometry().x() + m_leftButtons->geometry().width()

@@ -6,10 +6,6 @@
 
 #include "breezesettingsprovider.h"
 
-#include "breezeexceptionlist.h"
-
-#include <QRegularExpression>
-#include <QTextStream>
 
 namespace MkAuroraeNext
 {
@@ -48,54 +44,12 @@ void SettingsProvider::reconfigure()
     }
 
     m_defaultSettings->load();
-
-    ExceptionList exceptions;
-    exceptions.readConfig(m_config);
-    m_exceptions = exceptions.get();
 }
 
 //__________________________________________________________________
-InternalSettingsPtr SettingsProvider::internalSettings(Decoration *decoration) const
+InternalSettingsPtr SettingsProvider::internalSettings(Decoration *) const
 {
-    QString windowTitle;
-    QString windowClass;
-
-    for (auto internalSettings : std::as_const(m_exceptions)) {
-        // discard disabled exceptions
-        if (!internalSettings->enabled()) {
-            continue;
-        }
-
-        // discard exceptions with empty exception pattern
-        if (internalSettings->exceptionPattern().isEmpty()) {
-            continue;
-        }
-
-        /*
-        decide which value is to be compared
-        to the regular expression, based on exception type
-        */
-        QString value;
-        switch (internalSettings->exceptionType()) {
-        case InternalSettings::ExceptionWindowTitle: {
-            value = windowTitle.isEmpty() ? (windowTitle = decoration->window()->caption()) : windowTitle;
-            break;
-        }
-
-        default:
-        case InternalSettings::ExceptionWindowClassName: {
-            value = windowClass.isEmpty() ? (windowClass = decoration->window()->windowClass()) : windowClass;
-            break;
-        }
-        }
-
-        // check matching
-        QRegularExpression rx(internalSettings->exceptionPattern());
-        if (rx.match(value).hasMatch()) {
-            return internalSettings;
-        }
-    }
-
+    // mkAuroraeNext: no window specific exceptions (they could only change the border size and hide the title bar)
     return m_defaultSettings;
 }
 

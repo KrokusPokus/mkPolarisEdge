@@ -10,7 +10,6 @@ set(breezedecoration_SRCS
     breezebutton.cpp
     breezedecoration.cpp
     breezesettingsprovider.cpp
-    breezeexceptionlist.cpp
 )
 
 ### build library

@@ -359,9 +359,6 @@ QColor Button::foregroundColor() const
     } else if (isPressed()) {
         return d->titleBarColor();
 
-    } else if (type() == DecorationButtonType::Close && d->internalSettings()->outlineCloseButton()) {
-        return d->titleBarColor();
-
     } else if ((type() == DecorationButtonType::KeepBelow || type() == DecorationButtonType::KeepAbove || type() == DecorationButtonType::Shade
                 || type() == DecorationButtonType::ExcludeFromCapture)
                && isChecked()) {
@@ -403,14 +400,9 @@ QColor Button::backgroundColor() const
         return redColor;
     } else if (m_animation->state() == QAbstractAnimation::Running) {
         if (type() == DecorationButtonType::Close) {
-            if (d->internalSettings()->outlineCloseButton()) {
-                return c->isActive() ? KColorUtils::mix(redColor, redColor.lighter(), m_opacity) : KColorUtils::mix(redColor.lighter(), redColor, m_opacity);
-
-            } else {
-                QColor color(redColor.lighter());
-                color.setAlpha(color.alpha() * m_opacity);
-                return color;
-            }
+            QColor color(redColor.lighter());
+            color.setAlpha(color.alpha() * m_opacity);
+            return color;
 
         } else {
             QColor color(d->fontColor());
@@ -424,9 +416,6 @@ QColor Button::backgroundColor() const
         } else {
             return d->fontColor();
         }
-
-    } else if (type() == DecorationButtonType::Close && d->internalSettings()->outlineCloseButton()) {
-        return c->isActive() ? redColor : d->fontColor();
 
     } else {
         return QColor();

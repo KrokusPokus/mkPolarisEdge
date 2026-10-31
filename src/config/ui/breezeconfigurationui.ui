@@ -2,27 +2,7 @@
 <ui version="4.0">
  <class>BreezeConfigurationUI</class>
  <widget class="QWidget" name="BreezeConfigurationUI">
-  <property name="geometry">
-   <rect>
-    <x>0</x>
-    <y>0</y>
-    <width>469</width>
-    <height>418</height>
-   </rect>
-  </property>
-  <layout class="QVBoxLayout" name="verticalLayout">
-   <property name="leftMargin">
-    <number>0</number>
-   </property>
-   <property name="topMargin">
-    <number>0</number>
-   </property>
-   <property name="rightMargin">
-    <number>0</number>
-   </property>
-   <property name="bottomMargin">
-    <number>0</number>
-   </property>
+  <layout class="QVBoxLayout" name="mainLayout">
    <item>
     <widget class="QTabWidget" name="tabWidget">
      <property name="currentIndex">
@@ -31,159 +11,98 @@
      <property name="documentMode">
       <bool>true</bool>
      </property>
-     <widget class="QWidget" name="tab">
+     <widget class="QWidget" name="appearanceTab">
       <attribute name="title">
-       <string>General</string>
+       <string>Aussehen</string>
       </attribute>
-      <layout class="QFormLayout" name="formLayout_3">
+      <layout class="QFormLayout" name="appearanceLayout">
        <property name="formAlignment">
         <set>Qt::AlignmentFlag::AlignHCenter|Qt::AlignmentFlag::AlignTop</set>
        </property>
+       <property name="labelAlignment">
+        <set>Qt::AlignmentFlag::AlignRight|Qt::AlignmentFlag::AlignVCenter</set>
+       </property>
        <item row="0" column="0">
-        <widget class="QLabel" name="label_3">
+        <widget class="QLabel" name="frameLineColorLabel">
          <property name="text">
-          <string>Tit&amp;le alignment:</string>
+          <string>Linienfarbe:</string>
+         </property>
+         <property name="buddy">
+          <cstring>frameLineColor</cstring>
+         </property>
+        </widget>
+       </item>
+       <item row="0" column="1">
+        <layout class="QHBoxLayout" name="frameLineColorLayout">
+         <item>
+          <widget class="QComboBox" name="frameLineColor">
+           <property name="toolTip">
+            <string>Farbe der Rahmenlinie aktiver Fenster (die Farbvarianten der mkAurorae-Designs)</string>
+           </property>
+           <item><property name="text"><string>Grau</string></property></item>
+           <item><property name="text"><string>Akzentfarbe</string></property></item>
+           <item><property name="text"><string>Lila</string></property></item>
+           <item><property name="text"><string>Rot</string></property></item>
+           <item><property name="text"><string>Eigene Farbe</string></property></item>
+          </widget>
+         </item>
+         <item>
+          <widget class="KColorButton" name="frameLineCustomColor"/>
+         </item>
+         <item>
+          <spacer name="frameLineColorSpacer">
+           <property name="orientation">
+            <enum>Qt::Orientation::Horizontal</enum>
+           </property>
+          </spacer>
+         </item>
+        </layout>
+       </item>
+       <item row="1" column="1">
+        <widget class="QCheckBox" name="frameLineBold">
+         <property name="text">
+          <string>Breite Linie</string>
+         </property>
+         <property name="toolTip">
+          <string>Rahmenlinie 2 px breit, wie die B-Varianten der mkAurorae-Designs (die Ecken bleiben 1 px)</string>
+         </property>
+        </widget>
+       </item>
+       <item row="2" column="0">
+        <widget class="QLabel" name="titleAlignmentLabel">
+         <property name="text">
+          <string>Titelausrichtung:</string>
          </property>
          <property name="buddy">
           <cstring>titleAlignment</cstring>
          </property>
         </widget>
        </item>
-       <item row="0" column="1">
-        <widget class="QComboBox" name="titleAlignment">
-         <item>
-          <property name="text">
-           <string>Left</string>
-          </property>
-         </item>
-         <item>
-          <property name="text">
-           <string>Center</string>
-          </property>
-         </item>
-         <item>
-          <property name="text">
-           <string>Center (Full Width)</string>
-          </property>
-         </item>
-         <item>
-          <property name="text">
-           <string>Right</string>
-          </property>
-         </item>
-        </widget>
-       </item>
-       <item row="1" column="0">
-        <widget class="QLabel" name="label_4">
-         <property name="text">
-          <string>B&amp;utton size:</string>
-         </property>
-         <property name="buddy">
-          <cstring>buttonSize</cstring>
-         </property>
-        </widget>
-       </item>
-       <item row="1" column="1">
-        <widget class="QComboBox" name="buttonSize">
-         <item>
-          <property name="text">
-           <string>Tiny</string>
-          </property>
-         </item>
-         <item>
-          <property name="text">
-           <string comment="@item:inlistbox Button size:">Small</string>
-          </property>
-         </item>
-         <item>
-          <property name="text">
-           <string comment="@item:inlistbox Button size:">Medium</string>
-          </property>
-         </item>
-         <item>
-          <property name="text">
-           <string comment="@item:inlistbox Button size:">Large</string>
-          </property>
-         </item>
-         <item>
-          <property name="text">
-           <string comment="@item:inlistbox Button size:">Very Large</string>
-          </property>
-         </item>
-        </widget>
-       </item>
        <item row="2" column="1">
-        <widget class="QCheckBox" name="outlineCloseButton">
-         <property name="text">
-          <string>Draw a circle around close button</string>
-         </property>
-        </widget>
-       </item>
-       <item row="3" column="1">
-        <widget class="QCheckBox" name="drawBorderOnMaximizedWindows">
-         <property name="text">
-          <string>Draw border on maximized and tiled windows</string>
-         </property>
-        </widget>
-       </item>
-       <item row="4" column="1">
-        <layout class="QHBoxLayout" name="horizontalLayout">
-         <item>
-          <spacer name="horizontalSpacer_2">
-           <property name="orientation">
-            <enum>Qt::Orientation::Horizontal</enum>
-           </property>
-           <property name="sizeType">
-            <enum>QSizePolicy::Policy::Fixed</enum>
-           </property>
-           <property name="sizeHint" stdset="0">
-            <size>
-             <width>25</width>
-             <height>20</height>
-            </size>
-           </property>
-          </spacer>
-         </item>
-         <item>
-          <widget class="QLabel" name="drawBorderOnMaximizedWindowsHelpLabel">
-           <property name="text">
-            <string>This setting will allow you to resize from window edges touching screen edges. Scrollbars and window close buttons will shift positions and will not touch screen edges.</string>
-           </property>
-           <property name="wordWrap">
-            <bool>true</bool>
-           </property>
-          </widget>
-         </item>
-        </layout>
-       </item>
-       <item row="5" column="1">
-        <widget class="QCheckBox" name="drawBackgroundGradient">
-         <property name="text">
-          <string>Draw titlebar background gradient</string>
-         </property>
-        </widget>
-       </item>
-       <item row="6" column="1">
-        <widget class="QCheckBox" name="roundedCorners">
-         <property name="text">
-          <string>Round bottom corners of windows with no borders</string>
-         </property>
+        <widget class="QComboBox" name="titleAlignment">
+         <item><property name="text"><string>Links</string></property></item>
+         <item><property name="text"><string>Mittig</string></property></item>
+         <item><property name="text"><string>Mittig (ganze Breite)</string></property></item>
+         <item><property name="text"><string>Rechts</string></property></item>
         </widget>
        </item>
       </layout>
      </widget>
-     <widget class="QWidget" name="tab_4">
+     <widget class="QWidget" name="shadowTab">
       <attribute name="title">
-       <string>Shadows and Outline</string>
+       <string>Schatten</string>
       </attribute>
-      <layout class="QFormLayout" name="formLayout">
+      <layout class="QFormLayout" name="shadowLayout">
        <property name="formAlignment">
         <set>Qt::AlignmentFlag::AlignHCenter|Qt::AlignmentFlag::AlignTop</set>
        </property>
+       <property name="labelAlignment">
+        <set>Qt::AlignmentFlag::AlignRight|Qt::AlignmentFlag::AlignVCenter</set>
+       </property>
        <item row="0" column="0">
-        <widget class="QLabel" name="label">
+        <widget class="QLabel" name="shadowSizeLabel">
          <property name="text">
-          <string>Shadow size:</string>
+          <string>Schattengröße:</string>
          </property>
          <property name="buddy">
           <cstring>shadowSize</cstring>
@@ -192,37 +111,17 @@
        </item>
        <item row="0" column="1">
         <widget class="QComboBox" name="shadowSize">
-         <item>
-          <property name="text">
-           <string comment="@item:inlistbox Button size:">None</string>
-          </property>
-         </item>
-         <item>
-          <property name="text">
-           <string comment="@item:inlistbox Button size:">Small</string>
-          </property>
-         </item>
-         <item>
-          <property name="text">
-           <string comment="@item:inlistbox Button size:">Medium</string>
-          </property>
-         </item>
-         <item>
-          <property name="text">
-           <string comment="@item:inlistbox Button size:">Large</string>
-          </property>
-         </item>
-         <item>
-          <property name="text">
-           <string comment="@item:inlistbox Button size:">Very Large</string>
-          </property>
-         </item>
+         <item><property name="text"><string>Kein Schatten</string></property></item>
+         <item><property name="text"><string>Klein</string></property></item>
+         <item><property name="text"><string>Mittel</string></property></item>
+         <item><property name="text"><string>Groß</string></property></item>
+         <item><property name="text"><string>Sehr groß</string></property></item>
         </widget>
        </item>
        <item row="1" column="0">
-        <widget class="QLabel" name="label_2">
+        <widget class="QLabel" name="shadowStrengthLabel">
          <property name="text">
-          <string comment="strength of the shadow (from transparent to opaque)">Shadow strength:</string>
+          <string>Schattenstärke:</string>
          </property>
          <property name="buddy">
           <cstring>shadowStrength</cstring>
@@ -232,7 +131,7 @@
        <item row="1" column="1">
         <widget class="QSpinBox" name="shadowStrength">
          <property name="suffix">
-          <string>%</string>
+          <string> %</string>
          </property>
          <property name="minimum">
           <number>10</number>
@@ -243,38 +142,14 @@
         </widget>
        </item>
        <item row="2" column="0">
-        <widget class="QLabel" name="label_5">
+        <widget class="QLabel" name="shadowColorLabel">
          <property name="text">
-          <string>Shadow color:</string>
+          <string>Schattenfarbe:</string>
          </property>
         </widget>
        </item>
        <item row="2" column="1">
         <widget class="KColorButton" name="shadowColor"/>
-       </item>
-       <item row="3" column="1">
-        <widget class="QCheckBox" name="drawOutline">
-        <property name="text">
-         <string>Draw window outline</string>
-        </property>
-       </widget>
-       </item>
-      </layout>
-     </widget>
-     <widget class="QWidget" name="tab_3">
-      <attribute name="title">
-       <string>Window-Specific Overrides</string>
-      </attribute>
-      <layout class="QVBoxLayout" name="verticalLayout_3">
-       <item>
-        <widget class="MkAuroraeNext::ExceptionListWidget" name="exceptions" native="true">
-         <property name="sizePolicy">
-          <sizepolicy hsizetype="Preferred" vsizetype="Expanding">
-           <horstretch>0</horstretch>
-           <verstretch>0</verstretch>
-          </sizepolicy>
-         </property>
-        </widget>
        </item>
       </layout>
      </widget>
@@ -287,12 +162,6 @@
    <class>KColorButton</class>
    <extends>QPushButton</extends>
    <header>kcolorbutton.h</header>
-  </customwidget>
-  <customwidget>
-   <class>MkAuroraeNext::ExceptionListWidget</class>
-   <extends>QWidget</extends>
-   <header>config/breezeexceptionlistwidget.h</header>
-   <container>1</container>
   </customwidget>
  </customwidgets>
  <resources/>

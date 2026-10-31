@@ -10,7 +10,6 @@
         "blur": false,
         "recommendedBorderSize": "Tiny",
         "styles": [
-            "shadow",
             "titled"
         ]
     }
