@@ -48,7 +48,7 @@ protected Q_SLOTS:
     virtual void updateChanged();
 
 private:
-    //* show the custom color button only for the custom line color
+    //* show the custom color button only for the custom highlight color, bold only with a highlight
     void updateCustomColorVisibility();
 
     //* assigns the settings to the ui

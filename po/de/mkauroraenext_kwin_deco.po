@@ -2,60 +2,70 @@
 msgid ""
 msgstr ""
 "Project-Id-Version: mkauroraenext\n"
-"POT-Creation-Date: 2026-10-31 09:38\n"
+"POT-Creation-Date: 2026-10-31 10:01\n"
 "PO-Revision-Date: 2026-10-31 12:00+0100\n"
 "Last-Translator: KrokusPokus\n"
 "Language-Team: German\n"
 "Language: de\n"
 "MIME-Version: 1.0\n"
-"Plural-Forms: nplurals=2; plural=n != 1;\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
+"Plural-Forms: nplurals=2; plural=n != 1;\n"
 
 #: src/config/ui/breezeconfigurationui.ui
 msgid "Appearance"
 msgstr "Aussehen"
 
 #: src/config/ui/breezeconfigurationui.ui
-msgid "Line color:"
-msgstr "Linienfarbe:"
+msgid "Active window highlight:"
+msgstr "Aktives Fenster hervorheben:"
 
 #: src/config/ui/breezeconfigurationui.ui
-msgid "Color of the frame line of active windows (the color variants of the mkAurorae themes)"
-msgstr "Farbe der Rahmenlinie aktiver Fenster (die Farbvarianten der mkAurorae-Designs)"
+msgid ""
+"Colored line over the frame of the active window (the color variants of the "
+"mkAurorae themes). None: the active window has the same frame as inactive "
+"windows."
+msgstr ""
+"Farbige Linie über dem Rahmen des aktiven Fensters (die Farbvarianten der "
+"mkAurorae-Designs). Keine: Das aktive Fenster hat denselben Rahmen wie "
+"inaktive Fenster."
 
 #: src/config/ui/breezeconfigurationui.ui
-msgctxt "@item:inlistbox Line color:"
-msgid "Gray"
-msgstr "Grau"
+msgctxt "@item:inlistbox Active window highlight:"
+msgid "None"
+msgstr "Keine"
 
 #: src/config/ui/breezeconfigurationui.ui
-msgctxt "@item:inlistbox Line color:"
+msgctxt "@item:inlistbox Active window highlight:"
 msgid "Accent color"
 msgstr "Akzentfarbe"
 
 #: src/config/ui/breezeconfigurationui.ui
-msgctxt "@item:inlistbox Line color:"
+msgctxt "@item:inlistbox Active window highlight:"
 msgid "Purple"
 msgstr "Lila"
 
 #: src/config/ui/breezeconfigurationui.ui
-msgctxt "@item:inlistbox Line color:"
+msgctxt "@item:inlistbox Active window highlight:"
 msgid "Red"
 msgstr "Rot"
 
 #: src/config/ui/breezeconfigurationui.ui
-msgctxt "@item:inlistbox Line color:"
+msgctxt "@item:inlistbox Active window highlight:"
 msgid "Custom color"
 msgstr "Eigene Farbe"
 
 #: src/config/ui/breezeconfigurationui.ui
-msgid "Bold line"
-msgstr "Breite Linie"
+msgid "Bold highlight"
+msgstr "Breite Hervorhebung"
 
 #: src/config/ui/breezeconfigurationui.ui
-msgid "2 px frame line, as in the B variants of the mkAurorae themes (the corners stay 1 px)"
-msgstr "Rahmenlinie 2 px breit, wie bei den B-Varianten der mkAurorae-Designs (die Ecken bleiben 1 px)"
+msgid ""
+"2 px highlight line, as in the B variants of the mkAurorae themes (the "
+"corners stay 1 px)"
+msgstr ""
+"Hervorhebungslinie 2 px breit, wie bei den B-Varianten der mkAurorae-Designs "
+"(die Ecken bleiben 1 px)"
 
 #: src/config/ui/breezeconfigurationui.ui
 msgid "Title alignment:"

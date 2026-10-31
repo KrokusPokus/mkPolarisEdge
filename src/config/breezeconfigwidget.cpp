@@ -26,15 +26,15 @@ ConfigWidget::ConfigWidget(QObject *parent, const KPluginMetaData &data, const Q
     m_ui.tabWidget->tabBar()->setExpanding(true);
 
     // the custom color button keeps its place while hidden: the centered form does not jump
-    QSizePolicy colorPolicy = m_ui.frameLineCustomColor->sizePolicy();
+    QSizePolicy colorPolicy = m_ui.highlightCustomColor->sizePolicy();
     colorPolicy.setRetainSizeWhenHidden(true);
-    m_ui.frameLineCustomColor->setSizePolicy(colorPolicy);
+    m_ui.highlightCustomColor->setSizePolicy(colorPolicy);
 
     // track ui changes
-    connect(m_ui.frameLineColor, &QComboBox::currentIndexChanged, this, &ConfigWidget::updateChanged);
-    connect(m_ui.frameLineColor, &QComboBox::currentIndexChanged, this, &ConfigWidget::updateCustomColorVisibility);
-    connect(m_ui.frameLineCustomColor, &KColorButton::changed, this, &ConfigWidget::updateChanged);
-    connect(m_ui.frameLineBold, &QAbstractButton::clicked, this, &ConfigWidget::updateChanged);
+    connect(m_ui.activeHighlight, &QComboBox::currentIndexChanged, this, &ConfigWidget::updateChanged);
+    connect(m_ui.activeHighlight, &QComboBox::currentIndexChanged, this, &ConfigWidget::updateCustomColorVisibility);
+    connect(m_ui.highlightCustomColor, &KColorButton::changed, this, &ConfigWidget::updateChanged);
+    connect(m_ui.highlightBold, &QAbstractButton::clicked, this, &ConfigWidget::updateChanged);
     connect(m_ui.titleAlignment, &QComboBox::currentIndexChanged, this, &ConfigWidget::updateChanged);
     connect(m_ui.shadowSize, &QComboBox::currentIndexChanged, this, &ConfigWidget::updateChanged);
     connect(m_ui.shadowStrength, &QSpinBox::valueChanged, this, &ConfigWidget::updateChanged);
@@ -45,9 +45,9 @@ ConfigWidget::ConfigWidget(QObject *parent, const KPluginMetaData &data, const Q
 //_________________________________________________________
 void ConfigWidget::setUi(const InternalSettings &settings)
 {
-    m_ui.frameLineColor->setCurrentIndex(settings.frameLineColor());
-    m_ui.frameLineCustomColor->setColor(settings.frameLineCustomColor());
-    m_ui.frameLineBold->setChecked(settings.frameLineBold());
+    m_ui.activeHighlight->setCurrentIndex(settings.activeHighlight());
+    m_ui.highlightCustomColor->setColor(settings.activeHighlightCustomColor());
+    m_ui.highlightBold->setChecked(settings.activeHighlightBold());
     m_ui.titleAlignment->setCurrentIndex(settings.titleAlignment());
     m_ui.shadowSize->setCurrentIndex(std::min<int>(settings.shadowSize(), InternalSettings::ShadowVeryLarge));
     m_ui.shadowStrength->setValue(qRound(qreal(settings.shadowStrength() * 100) / 255));
@@ -58,7 +58,9 @@ void ConfigWidget::setUi(const InternalSettings &settings)
 //_________________________________________________________
 void ConfigWidget::updateCustomColorVisibility()
 {
-    m_ui.frameLineCustomColor->setVisible(m_ui.frameLineColor->currentIndex() == InternalSettings::LineCustom);
+    m_ui.highlightCustomColor->setVisible(m_ui.activeHighlight->currentIndex() == InternalSettings::HighlightCustom);
+    // without highlight the regular frame is drawn, its width is fixed
+    m_ui.highlightBold->setEnabled(m_ui.activeHighlight->currentIndex() != InternalSettings::HighlightNone);
 }
 
 //_________________________________________________________
@@ -76,9 +78,9 @@ void ConfigWidget::save()
     m_internalSettings = InternalSettingsPtr(new InternalSettings());
     m_internalSettings->load();
 
-    m_internalSettings->setFrameLineColor(m_ui.frameLineColor->currentIndex());
-    m_internalSettings->setFrameLineCustomColor(m_ui.frameLineCustomColor->color());
-    m_internalSettings->setFrameLineBold(m_ui.frameLineBold->isChecked());
+    m_internalSettings->setActiveHighlight(m_ui.activeHighlight->currentIndex());
+    m_internalSettings->setActiveHighlightCustomColor(m_ui.highlightCustomColor->color());
+    m_internalSettings->setActiveHighlightBold(m_ui.highlightBold->isChecked());
     m_internalSettings->setTitleAlignment(m_ui.titleAlignment->currentIndex());
     m_internalSettings->setShadowSize(m_ui.shadowSize->currentIndex());
     m_internalSettings->setShadowStrength(qRound(qreal(m_ui.shadowStrength->value() * 255) / 100));
@@ -117,9 +119,9 @@ void ConfigWidget::updateChanged()
         return;
     }
 
-    const bool modified = m_ui.frameLineColor->currentIndex() != m_internalSettings->frameLineColor()
-        || m_ui.frameLineCustomColor->color() != m_internalSettings->frameLineCustomColor()
-        || m_ui.frameLineBold->isChecked() != m_internalSettings->frameLineBold()
+    const bool modified = m_ui.activeHighlight->currentIndex() != m_internalSettings->activeHighlight()
+        || m_ui.highlightCustomColor->color() != m_internalSettings->activeHighlightCustomColor()
+        || m_ui.highlightBold->isChecked() != m_internalSettings->activeHighlightBold()
         || m_ui.titleAlignment->currentIndex() != m_internalSettings->titleAlignment()
         || m_ui.shadowSize->currentIndex() != m_internalSettings->shadowSize()
         || qRound(qreal(m_ui.shadowStrength->value() * 255) / 100) != m_internalSettings->shadowStrength()

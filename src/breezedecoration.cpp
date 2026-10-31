@@ -471,8 +471,11 @@ void Decoration::paint(QPainter *painter, const QRectF &repaintRegion)
         // maximized: the title area is plain (measured on the Aurorae rendering of decoration-maximized-center)
         fill(0, 0, W, borderTop(), Theme::Title_Maximized);
     } else {
-        const QColor line = active ? lineColor() : Theme::Line_Inactive;
-        const bool bold = active && m_internalSettings->frameLineBold();   // inactive windows: the same in both variants
+        // the active window gets a colored line with rounded corners over the regular frame; without highlight (and
+        // for inactive windows) the regular frame is drawn: gray line, square corners
+        const bool highlight = active && m_internalSettings->activeHighlight() != InternalSettings::HighlightNone;
+        const QColor line = highlight ? highlightColor() : Theme::Line_Inactive;
+        const bool bold = highlight && m_internalSettings->activeHighlightBold();
         const qreal b = bold ? 0 : 1;   // first row / column of the straight line pieces
 
         // pixel 0: rim; in the top corners a gradient over 26 px, the top row lighter
@@ -482,7 +485,7 @@ void Decoration::paint(QPainter *painter, const QRectF &repaintRegion)
         fill(W - 4, 0, 4, T, vertical(0, T, Theme::Rim_Top, Theme::Rim));
 
         // straight pieces of the line, and pixels 2 and 3 inside it
-        fill(4, b, W - 8, 2 - b, active ? QBrush(line) : QBrush(Theme::Line_InactiveTop));   // top
+        fill(4, b, W - 8, 2 - b, highlight ? line : Theme::Line_InactiveTop);   // top
         fill(b, T, 4 - b, H - T - 4, line);              // left
         fill(W - 4, T, 4 - b, H - T - 4, line);          // right
         fill(4, H - 4, W - 8, 4 - b, line);              // bottom
@@ -490,7 +493,7 @@ void Decoration::paint(QPainter *painter, const QRectF &repaintRegion)
         fill(W - 4, T, 2, H - T - 4, Theme::Inner);
         fill(4, H - 4, W - 8, 2, Theme::Inner);
 
-        if (active) {
+        if (highlight) {
             // corner pieces: line with outer radius 3, inside radius 2 (1 px also in the bold variant)
             painter->fillPath(cornerPath(QRectF(1, 1, 3, T - 1), 0, Theme::Corner_OuterRadius), line);
             painter->fillPath(cornerPath(QRectF(W - 4, 1, 3, T - 1), 1, Theme::Corner_OuterRadius), line);
@@ -500,8 +503,6 @@ void Decoration::paint(QPainter *painter, const QRectF &repaintRegion)
             painter->fillPath(cornerPath(QRectF(W - 4, 2, 2, T - 4), 1, Theme::Corner_InnerRadius), titleBrush);
             painter->fillPath(cornerPath(QRectF(2, H - 4, 2, 2), 2, Theme::Corner_InnerRadius), Theme::Inner);
             painter->fillPath(cornerPath(QRectF(W - 4, H - 4, 2, 2), 3, Theme::Corner_InnerRadius), Theme::Inner);
-            fill(2, T - 2, 2, 2, Theme::Inner);
-            fill(W - 4, T - 2, 2, 2, Theme::Inner);
         } else {
             // square corners, the top row of the line lighter
             fill(1, 1, 3, T - 1, line);
@@ -510,12 +511,19 @@ void Decoration::paint(QPainter *painter, const QRectF &repaintRegion)
             fill(W - 4, 1, 3, 1, Theme::Line_InactiveTop);
             fill(1, H - 4, 3, 3, line);
             fill(W - 4, H - 4, 3, 3, line);
-            fill(2, 2, 2, T - 3, titleBrush);
-            fill(W - 4, 2, 2, T - 3, titleBrush);
-            fill(2, T - 1, 2, 1, Theme::Separator_Inactive);
-            fill(W - 4, T - 1, 2, 1, Theme::Separator_Inactive);
+            fill(2, 2, 2, active ? T - 4 : T - 3, titleBrush);
+            fill(W - 4, 2, 2, active ? T - 4 : T - 3, titleBrush);
             fill(2, H - 4, 2, 2, Theme::Inner);
             fill(W - 4, H - 4, 2, 2, Theme::Inner);
+        }
+
+        // inside the top corner pieces below the title gradient
+        if (active) {
+            fill(2, T - 2, 2, 2, Theme::Inner);
+            fill(W - 4, T - 2, 2, 2, Theme::Inner);
+        } else {
+            fill(2, T - 1, 2, 1, Theme::Separator_Inactive);
+            fill(W - 4, T - 1, 2, 1, Theme::Separator_Inactive);
         }
 
         // title gradient and the separator rows between the corner pieces
@@ -530,20 +538,18 @@ void Decoration::paint(QPainter *painter, const QRectF &repaintRegion)
     paintTitleBar(painter, repaintRegion);
 }
 
-QColor Decoration::lineColor() const
+QColor Decoration::highlightColor() const
 {
-    // mkAuroraeNext: the frame line of active windows, the color variants of the mkAurorae themes
-    switch (m_internalSettings->frameLineColor()) {
-    case InternalSettings::LineGray:
-        return Theme::Line_Inactive;
-    case InternalSettings::LineAccent:   // ColorScheme-ViewFocus in the SVG
+    // mkAuroraeNext: the highlight line of the active window, the color variants of the mkAurorae themes
+    switch (m_internalSettings->activeHighlight()) {
+    case InternalSettings::HighlightAccent:   // ColorScheme-ViewFocus in the SVG
         return KColorScheme(QPalette::Active, KColorScheme::View).decoration(KColorScheme::FocusColor).color();
-    case InternalSettings::LineRed:
+    case InternalSettings::HighlightRed:
         return Theme::Line_Red;
-    case InternalSettings::LineCustom:
-        return m_internalSettings->frameLineCustomColor();
+    case InternalSettings::HighlightCustom:
+        return m_internalSettings->activeHighlightCustomColor();
     default:
-    case InternalSettings::LinePurple:
+    case InternalSettings::HighlightPurple:
         return Theme::Line_Purple;
     }
 }

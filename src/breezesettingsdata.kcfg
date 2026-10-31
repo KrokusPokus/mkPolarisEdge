@@ -43,24 +43,25 @@
       <default>AlignLeft</default>
     </entry>
 
-    <!-- color of the frame line of active windows: the variants of the mkAurorae themes, or a custom color -->
-    <entry name="FrameLineColor" type="Enum">
+    <!-- highlight of the active window: a colored line over the regular frame, as in the color variants of the
+         mkAurorae themes; HighlightNone draws the regular frame (as for inactive windows, the gray mkAurorae theme) -->
+    <entry name="ActiveHighlight" type="Enum">
       <choices>
-          <choice name="LineGray" />
-          <choice name="LineAccent" />
-          <choice name="LinePurple" />
-          <choice name="LineRed" />
-          <choice name="LineCustom" />
+          <choice name="HighlightNone" />
+          <choice name="HighlightAccent" />
+          <choice name="HighlightPurple" />
+          <choice name="HighlightRed" />
+          <choice name="HighlightCustom" />
       </choices>
-      <default>LinePurple</default>
+      <default>HighlightPurple</default>
     </entry>
 
-    <entry name="FrameLineCustomColor" type="Color">
+    <entry name="ActiveHighlightCustomColor" type="Color">
       <default>133, 0, 247</default>
     </entry>
 
-    <!-- 2 px frame line on the straight parts, as in the "B" variants (corners stay 1 px) -->
-    <entry name="FrameLineBold" type="Bool">
+    <!-- 2 px highlight on the straight parts, as in the "B" variants (corners stay 1 px) -->
+    <entry name="ActiveHighlightBold" type="Bool">
       <default>false</default>
     </entry>
 

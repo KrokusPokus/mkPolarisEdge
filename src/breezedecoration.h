@@ -108,8 +108,8 @@ private:
     //*@name border size
     //@{
     qreal borderSize(bool bottom, qreal scale) const;
-    //* mkAuroraeNext: color of the frame line of active windows (setting FrameLineColor)
-    QColor lineColor() const;
+    //* mkAuroraeNext: color of the highlight line of the active window (setting ActiveHighlight, not HighlightNone)
+    QColor highlightColor() const;
     QMarginsF bordersFor(qreal scale) const;
     //@}
 

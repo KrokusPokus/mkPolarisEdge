@@ -23,34 +23,34 @@
         <set>Qt::AlignmentFlag::AlignRight|Qt::AlignmentFlag::AlignVCenter</set>
        </property>
        <item row="0" column="0">
-        <widget class="QLabel" name="frameLineColorLabel">
+        <widget class="QLabel" name="activeHighlightLabel">
          <property name="text">
-          <string>Line color:</string>
+          <string>Active window highlight:</string>
          </property>
          <property name="buddy">
-          <cstring>frameLineColor</cstring>
+          <cstring>activeHighlight</cstring>
          </property>
         </widget>
        </item>
        <item row="0" column="1">
-        <layout class="QHBoxLayout" name="frameLineColorLayout">
+        <layout class="QHBoxLayout" name="activeHighlightLayout">
          <item>
-          <widget class="QComboBox" name="frameLineColor">
+          <widget class="QComboBox" name="activeHighlight">
            <property name="toolTip">
-            <string>Color of the frame line of active windows (the color variants of the mkAurorae themes)</string>
+            <string>Colored line over the frame of the active window (the color variants of the mkAurorae themes). None: the active window has the same frame as inactive windows.</string>
            </property>
-           <item><property name="text"><string comment="@item:inlistbox Line color:">Gray</string></property></item>
-           <item><property name="text"><string comment="@item:inlistbox Line color:">Accent color</string></property></item>
-           <item><property name="text"><string comment="@item:inlistbox Line color:">Purple</string></property></item>
-           <item><property name="text"><string comment="@item:inlistbox Line color:">Red</string></property></item>
-           <item><property name="text"><string comment="@item:inlistbox Line color:">Custom color</string></property></item>
+           <item><property name="text"><string comment="@item:inlistbox Active window highlight:">None</string></property></item>
+           <item><property name="text"><string comment="@item:inlistbox Active window highlight:">Accent color</string></property></item>
+           <item><property name="text"><string comment="@item:inlistbox Active window highlight:">Purple</string></property></item>
+           <item><property name="text"><string comment="@item:inlistbox Active window highlight:">Red</string></property></item>
+           <item><property name="text"><string comment="@item:inlistbox Active window highlight:">Custom color</string></property></item>
           </widget>
          </item>
          <item>
-          <widget class="KColorButton" name="frameLineCustomColor"/>
+          <widget class="KColorButton" name="highlightCustomColor"/>
          </item>
          <item>
-          <spacer name="frameLineColorSpacer">
+          <spacer name="activeHighlightSpacer">
            <property name="orientation">
             <enum>Qt::Orientation::Horizontal</enum>
            </property>
@@ -59,12 +59,12 @@
         </layout>
        </item>
        <item row="1" column="1">
-        <widget class="QCheckBox" name="frameLineBold">
+        <widget class="QCheckBox" name="highlightBold">
          <property name="text">
-          <string>Bold line</string>
+          <string>Bold highlight</string>
          </property>
          <property name="toolTip">
-          <string>2 px frame line, as in the B variants of the mkAurorae themes (the corners stay 1 px)</string>
+          <string>2 px highlight line, as in the B variants of the mkAurorae themes (the corners stay 1 px)</string>
          </property>
         </widget>
        </item>
