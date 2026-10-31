@@ -60,7 +60,7 @@
       <default>133, 0, 247</default>
     </entry>
 
-    <!-- 2 px highlight on the straight parts, as in the "B" variants (corners stay 1 px) -->
+    <!-- 2 px highlight, corners included, as in the "B" variants -->
     <entry name="ActiveHighlightBold" type="Bool">
       <default>false</default>
     </entry>

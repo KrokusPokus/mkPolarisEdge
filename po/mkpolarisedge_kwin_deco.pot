@@ -49,7 +49,7 @@ msgid "Bold highlight"
 msgstr ""
 
 #: src/config/ui/breezeconfigurationui.ui
-msgid "2 px highlight line, as in the B variants of the mkAurorae themes (the corners stay 1 px)"
+msgid "2 px highlight line, as in the B variants of the mkAurorae themes"
 msgstr ""
 
 #: src/config/ui/breezeconfigurationui.ui

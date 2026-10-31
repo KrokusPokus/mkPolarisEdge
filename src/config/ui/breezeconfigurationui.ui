@@ -64,7 +64,7 @@
           <string>Bold highlight</string>
          </property>
          <property name="toolTip">
-          <string>2 px highlight line, as in the B variants of the mkAurorae themes (the corners stay 1 px)</string>
+          <string>2 px highlight line, as in the B variants of the mkAurorae themes</string>
          </property>
         </widget>
        </item>
