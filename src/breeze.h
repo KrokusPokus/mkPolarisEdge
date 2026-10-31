@@ -46,6 +46,13 @@ static constexpr int TitleBar_EdgeRight = 5;    // TitleEdgeRight: from the righ
 static constexpr int TitleBar_CaptionMargin = 5; // between the buttons and the caption
 //* height of the top part of the decoration, measured from the outer edge: 3 + 20 + 3 = 26
 static constexpr int TitleBar_TotalHeight = TitleBar_EdgeTop + TitleBar_ButtonSize + TitleBar_EdgeBottom;
+//* maximized windows (TitleEdgeTopMaximized=-1, TitleEdgeBottomMaximized=1; left and right measured on the Aurorae
+// rendering): buttons cut off by one pixel at the top, the first and the last one right at the edges
+static constexpr int TitleBar_EdgeTopMaximized = -1;
+static constexpr int TitleBar_EdgeBottomMaximized = 1;
+static constexpr int TitleBar_EdgeLeftMaximized = 0;
+static constexpr int TitleBar_EdgeRightMaximized = 0;
+static constexpr int TitleBar_TotalHeightMaximized = TitleBar_EdgeTopMaximized + TitleBar_ButtonSize + TitleBar_EdgeBottomMaximized;
 }
 
 //* mkAuroraeNext: colors of the mkAurorae themes (decoration.svg)
@@ -56,6 +63,7 @@ inline const QColor Rim_Top(0x27, 0x27, 0x27);      // its top row; in the top c
 inline const QColor Inner(0x24, 0x24, 0x24);        // pixels 2 and 3 of the frame
 inline const QColor Title_Light(0x35, 0x35, 0x35);  // title gradient, active: light at the top, inactive: reversed
 inline const QColor Title_Dark(0x24, 0x24, 0x24);
+inline const QColor Title_Maximized(0x35, 0x35, 0x35);   // maximized: plain, no gradient, no separators
 inline const QColor Separator(0x2c, 0x2c, 0x2c);    // row 24
 inline const QColor Separator_Active(0x21, 0x21, 0x21);   // row 25
 inline const QColor Separator_Inactive(0x3c, 0x3c, 0x3c);

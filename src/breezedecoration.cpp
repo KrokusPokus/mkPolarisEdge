@@ -339,7 +339,7 @@ QMarginsF Decoration::bordersFor(qreal scale) const
     } else {
         // mkAuroraeNext: TitleEdgeTop + button size + TitleEdgeBottom from the outer edge; the frame strip (resize area)
         // is the top part of it
-        top = KDecoration3::snapToPixelGrid(Metrics::TitleBar_TotalHeight, scale);
+        top = KDecoration3::snapToPixelGrid(isMaximized() ? Metrics::TitleBar_TotalHeightMaximized : Metrics::TitleBar_TotalHeight, scale);
     }
     return QMarginsF(left, top, right, bottom);
 }
@@ -412,16 +412,19 @@ void Decoration::updateButtonsGeometry()
         btn->setPadding(QMargins());
     }
 
-    const qreal y = KDecoration3::snapToPixelGrid(Metrics::TitleBar_EdgeTop, scale);
+    const bool maximized = isMaximized();
+    const qreal y = KDecoration3::snapToPixelGrid(maximized ? Metrics::TitleBar_EdgeTopMaximized : Metrics::TitleBar_EdgeTop, scale);
 
     if (!m_leftButtons->buttons().isEmpty()) {
         m_leftButtons->setSpacing(0);
-        m_leftButtons->setPos(QPointF(KDecoration3::snapToPixelGrid(Metrics::TitleBar_EdgeLeft, scale), y));
+        const qreal x = maximized ? Metrics::TitleBar_EdgeLeftMaximized : Metrics::TitleBar_EdgeLeft;
+        m_leftButtons->setPos(QPointF(KDecoration3::snapToPixelGrid(x, scale), y));
     }
 
     if (!m_rightButtons->buttons().isEmpty()) {
         m_rightButtons->setSpacing(0);
-        const qreal x = size().width() - Metrics::TitleBar_EdgeRight - m_rightButtons->geometry().width();
+        const qreal edge = maximized ? Metrics::TitleBar_EdgeRightMaximized : Metrics::TitleBar_EdgeRight;
+        const qreal x = size().width() - edge - m_rightButtons->geometry().width();
         m_rightButtons->setPos(QPointF(KDecoration3::snapToPixelGrid(x, scale), y));
     }
 
@@ -497,10 +500,8 @@ void Decoration::paint(QPainter *painter, const QRectF &repaintRegion)
     const QBrush titleBrush = active ? vertical(2, T - 2, Theme::Title_Light, Theme::Title_Dark) : vertical(2, T - 1, Theme::Title_Dark, Theme::Title_Light);
 
     if (!framed) {
-        // decoration-maximized-center: title gradient and the two separator rows, no frame
-        fill(0, 0, W, T - 2, titleBrush);
-        fill(0, T - 2, W, 1, Theme::Separator);
-        fill(0, T - 1, W, 1, Theme::Separator_Active);
+        // maximized: the title area is plain (measured on the Aurorae rendering of decoration-maximized-center)
+        fill(0, 0, W, borderTop(), Theme::Title_Maximized);
     } else {
         const QColor line = active ? lineColor() : Theme::Line_Inactive;
         const bool bold = active && m_internalSettings->frameLineBold();   // inactive windows: the same in both variants
@@ -630,7 +631,7 @@ QPair<QRectF, Qt::Alignment> Decoration::captionRect() const
                                                                         + Metrics::TitleBar_CaptionMargin,
                                                                 window()->scale());
 
-        const qreal yOffset = KDecoration3::snapToPixelGrid(Metrics::TitleBar_EdgeTop, window()->scale());
+        const qreal yOffset = KDecoration3::snapToPixelGrid(isMaximized() ? Metrics::TitleBar_EdgeTopMaximized : Metrics::TitleBar_EdgeTop, window()->scale());
         const QRectF maxRect(leftOffset, yOffset, size().width() - leftOffset - rightOffset, captionHeight());
 
         switch (m_internalSettings->titleAlignment()) {
