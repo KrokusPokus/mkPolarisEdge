@@ -1,7 +1,7 @@
 <!DOCTYPE RCC>
 <RCC version="1.0">
 <!-- Buttons of the mkAurorae themes (identical in all variants), rendered with QSvgRenderer -->
-<qresource prefix="/mkauroraenext">
+<qresource prefix="/mkpolarisedge">
     <file>buttons/close.svg</file>
     <file>buttons/minimize.svg</file>
     <file>buttons/maximize.svg</file>

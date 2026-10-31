@@ -15,7 +15,7 @@
 
 class QVariantAnimation;
 
-namespace MkAuroraeNext
+namespace MkPolarisEdge
 {
 class Button : public KDecoration3::DecorationButton
 {
@@ -94,7 +94,7 @@ private:
 
     //* draw button icon
     void drawIcon(QPainter *) const;
-    //* mkAuroraeNext: draws the button from the SVGs of the mkAurorae themes
+    //* mkPolarisEdge: draws the button from the SVGs of the mkAurorae themes
     void drawThemeButton(QPainter *) const;
 
     //*@name colors

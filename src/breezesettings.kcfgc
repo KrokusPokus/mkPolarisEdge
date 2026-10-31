@@ -1,6 +1,6 @@
 File=breezesettingsdata.kcfg
 ClassName=InternalSettings
-NameSpace=MkAuroraeNext
+NameSpace=MkPolarisEdge
 Singleton=false
 Mutators=true
 GlobalEnums=true

@@ -1,0 +1,15 @@
+{
+    "KPlugin": {
+        "Description": "Modify the appearance of the mkPolarisEdge window decoration",
+        "Description[de]": "Das Erscheinungsbild der Fensterdekoration mkPolarisEdge ändern",
+        "Icon": "preferences-system-windows",
+        "Name": "mkPolarisEdge Window Decoration",
+        "Name[de]": "Fensterdekoration mkPolarisEdge",
+        "ServiceTypes": [
+            "KCModule"
+        ]
+    },
+    "X-KDE-Keywords": "mkpolarisedge,decoration",
+    "X-KDE-ParentApp": "kcontrol",
+    "X-KDE-Weight": 60
+}

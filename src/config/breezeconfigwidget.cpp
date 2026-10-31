@@ -14,12 +14,12 @@
 #include <QDBusConnection>
 #include <QDBusMessage>
 
-namespace MkAuroraeNext
+namespace MkPolarisEdge
 {
 //_________________________________________________________
 ConfigWidget::ConfigWidget(QObject *parent, const KPluginMetaData &data, const QVariantList & /*args*/)
     : KCModule(parent, data)
-    , m_configuration(KSharedConfig::openConfig(QStringLiteral("mkauroraenextrc")))
+    , m_configuration(KSharedConfig::openConfig(QStringLiteral("mkpolarisedgerc")))
     , m_changed(false)
 {
     m_ui.setupUi(widget());
@@ -98,7 +98,7 @@ void ConfigWidget::save()
 
     // needed for the decoration to reload shadows
     {
-        QDBusMessage message(QDBusMessage::createSignal("/MkAuroraeNextDecoration", "org.kde.MkAuroraeNext.Style", "reparseConfiguration"));
+        QDBusMessage message(QDBusMessage::createSignal("/MkPolarisEdgeDecoration", "org.kde.MkPolarisEdge.Style", "reparseConfiguration"));
         QDBusConnection::sessionBus().send(message);
     }
 }

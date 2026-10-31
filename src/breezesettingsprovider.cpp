@@ -7,13 +7,13 @@
 #include "breezesettingsprovider.h"
 
 
-namespace MkAuroraeNext
+namespace MkPolarisEdge
 {
 SettingsProvider *SettingsProvider::s_self = nullptr;
 
 //__________________________________________________________________
 SettingsProvider::SettingsProvider()
-    : m_config(KSharedConfig::openConfig(QStringLiteral("mkauroraenextrc")))
+    : m_config(KSharedConfig::openConfig(QStringLiteral("mkpolarisedgerc")))
 {
     reconfigure();
 }
@@ -49,7 +49,7 @@ void SettingsProvider::reconfigure()
 //__________________________________________________________________
 InternalSettingsPtr SettingsProvider::internalSettings(Decoration *) const
 {
-    // mkAuroraeNext: no window specific exceptions (they could only change the border size and hide the title bar)
+    // mkPolarisEdge: no window specific exceptions (they could only change the border size and hide the title bar)
     return m_defaultSettings;
 }
 

@@ -3,9 +3,9 @@
         "Description": "Window decoration in the style of the mkAurorae themes, based on Breeze",
         "Description[de]": "Fensterdekoration im Stil der mkAurorae-Designs, auf Basis von Breeze",
         "EnabledByDefault": true,
-        "Name": "mkAuroraeNext"
+        "Name": "mkPolarisEdge"
     },
-    "X-KDE-ConfigModule": "kcm_mkauroraenext",
+    "X-KDE-ConfigModule": "kcm_mkpolarisedge",
     "org.kde.kdecoration3": {
         "blur": false,
         "recommendedBorderSize": "Tiny",

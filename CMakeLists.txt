@@ -1,6 +1,6 @@
-# mkAuroraeNext: window decoration plugin for KWin (KDecoration3), based on the decoration of Breeze 6.8.1
+# mkPolarisEdge: window decoration plugin for KWin (KDecoration3), based on the decoration of Breeze 6.8.1
 cmake_minimum_required(VERSION 3.16)
-project(mkauroraenext VERSION 0.1.0)
+project(mkpolarisedge VERSION 0.1.0)
 
 set(KF6_MIN_VERSION "6.30.0")
 set(QT_MIN_VERSION "6.11.0")
@@ -35,7 +35,7 @@ find_package(KDecoration3 REQUIRED)
 add_subdirectory(common)
 add_subdirectory(src)
 
-# translations: po/<language>/mkauroraenext_kwin_deco.po (template: tools/extract-messages.py)
+# translations: po/<language>/mkpolarisedge_kwin_deco.po (template: tools/extract-messages.py)
 ki18n_install(po)
 
 feature_summary(WHAT ALL INCLUDE_QUIET_PACKAGES FATAL_ON_MISSING_REQUIRED_PACKAGES)

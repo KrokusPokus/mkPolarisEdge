@@ -1,4 +1,4 @@
-add_definitions(-DTRANSLATION_DOMAIN="mkauroraenext_kwin_deco")
+add_definitions(-DTRANSLATION_DOMAIN="mkpolarisedge_kwin_deco")
 
 ################# includes #################
 include_directories(${CMAKE_SOURCE_DIR}/common)
@@ -20,7 +20,7 @@ add_library(breezedecoration MODULE
     ${breezedecoration_config_PART_FORMS_HEADERS})
 
 set_target_properties(breezedecoration PROPERTIES
-    OUTPUT_NAME org.kde.mkauroraenext
+    OUTPUT_NAME org.kde.mkpolarisedge
 )
 
 target_link_libraries(breezedecoration
@@ -38,7 +38,7 @@ target_link_libraries(breezedecoration
 )
 
 install(TARGETS breezedecoration DESTINATION ${KDE_INSTALL_PLUGINDIR}/${KDECORATION_PLUGIN_DIR})
-install(FILES breezesettingsdata.kcfg DESTINATION ${KDE_INSTALL_KCFGDIR} RENAME mkauroraenext-decoration.kcfg)
+install(FILES breezesettingsdata.kcfg DESTINATION ${KDE_INSTALL_KCFGDIR} RENAME mkpolarisedge-decoration.kcfg)
 
 add_subdirectory(config)
 

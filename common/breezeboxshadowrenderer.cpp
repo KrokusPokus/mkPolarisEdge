@@ -22,7 +22,7 @@
 #include <QPainter>
 #include <QtMath>
 
-namespace MkAuroraeNext
+namespace MkPolarisEdge
 {
 static inline int calculateBlurRadius(qreal stdDev)
 {
@@ -339,4 +339,4 @@ QSizeF BoxShadowRenderer::calculateMinimumShadowTextureSize(const QSizeF &boxSiz
     return boxSize + 2 * calculateBlurExtent(radius) + QSizeF(std::abs(offset.x()), std::abs(offset.y()));
 }
 
-} // namespace MkAuroraeNext
+} // namespace MkPolarisEdge

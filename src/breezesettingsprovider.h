@@ -14,7 +14,7 @@
 
 #include <QObject>
 
-namespace MkAuroraeNext
+namespace MkPolarisEdge
 {
 class SettingsProvider : public QObject
 {

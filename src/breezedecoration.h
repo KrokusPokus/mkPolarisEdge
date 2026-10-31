@@ -24,7 +24,7 @@ class DecorationButton;
 class DecorationButtonGroup;
 }
 
-namespace MkAuroraeNext
+namespace MkPolarisEdge
 {
 class Decoration : public KDecoration3::Decoration
 {
@@ -108,7 +108,7 @@ private:
     //*@name border size
     //@{
     qreal borderSize(bool bottom, qreal scale) const;
-    //* mkAuroraeNext: color of the highlight line of the active window (setting ActiveHighlight, not HighlightNone)
+    //* mkPolarisEdge: color of the highlight line of the active window (setting ActiveHighlight, not HighlightNone)
     QColor highlightColor() const;
     QMarginsF bordersFor(qreal scale) const;
     //@}

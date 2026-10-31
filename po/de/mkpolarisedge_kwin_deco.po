@@ -1,123 +1,138 @@
-# Translation template of the mkAuroraeNext window decoration.
+# German translation of the mkPolarisEdge window decoration.
 msgid ""
 msgstr ""
-"Project-Id-Version: mkauroraenext\n"
+"Project-Id-Version: mkpolarisedge\n"
 "POT-Creation-Date: 2026-10-31 10:01\n"
+"PO-Revision-Date: 2026-10-31 12:00+0100\n"
+"Last-Translator: KrokusPokus\n"
+"Language-Team: German\n"
+"Language: de\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
+"Plural-Forms: nplurals=2; plural=n != 1;\n"
 
 #: src/config/ui/breezeconfigurationui.ui
 msgid "Appearance"
-msgstr ""
+msgstr "Aussehen"
 
 #: src/config/ui/breezeconfigurationui.ui
 msgid "Active window highlight:"
-msgstr ""
+msgstr "Aktives Fenster hervorheben:"
 
 #: src/config/ui/breezeconfigurationui.ui
-msgid "Colored line over the frame of the active window (the color variants of the mkAurorae themes). None: the active window has the same frame as inactive windows."
+msgid ""
+"Colored line over the frame of the active window (the color variants of the "
+"mkAurorae themes). None: the active window has the same frame as inactive "
+"windows."
 msgstr ""
+"Farbige Linie über dem Rahmen des aktiven Fensters (die Farbvarianten der "
+"mkAurorae-Designs). Keine: Das aktive Fenster hat denselben Rahmen wie "
+"inaktive Fenster."
 
 #: src/config/ui/breezeconfigurationui.ui
 msgctxt "@item:inlistbox Active window highlight:"
 msgid "None"
-msgstr ""
+msgstr "Keine"
 
 #: src/config/ui/breezeconfigurationui.ui
 msgctxt "@item:inlistbox Active window highlight:"
 msgid "Accent color"
-msgstr ""
+msgstr "Akzentfarbe"
 
 #: src/config/ui/breezeconfigurationui.ui
 msgctxt "@item:inlistbox Active window highlight:"
 msgid "Purple"
-msgstr ""
+msgstr "Lila"
 
 #: src/config/ui/breezeconfigurationui.ui
 msgctxt "@item:inlistbox Active window highlight:"
 msgid "Red"
-msgstr ""
+msgstr "Rot"
 
 #: src/config/ui/breezeconfigurationui.ui
 msgctxt "@item:inlistbox Active window highlight:"
 msgid "Custom color"
-msgstr ""
+msgstr "Eigene Farbe"
 
 #: src/config/ui/breezeconfigurationui.ui
 msgid "Bold highlight"
-msgstr ""
+msgstr "Breite Hervorhebung"
 
 #: src/config/ui/breezeconfigurationui.ui
-msgid "2 px highlight line, as in the B variants of the mkAurorae themes (the corners stay 1 px)"
+msgid ""
+"2 px highlight line, as in the B variants of the mkAurorae themes (the "
+"corners stay 1 px)"
 msgstr ""
+"Hervorhebungslinie 2 px breit, wie bei den B-Varianten der mkAurorae-Designs "
+"(die Ecken bleiben 1 px)"
 
 #: src/config/ui/breezeconfigurationui.ui
 msgid "Title alignment:"
-msgstr ""
+msgstr "Titelausrichtung:"
 
 #: src/config/ui/breezeconfigurationui.ui
 msgctxt "@item:inlistbox alignment"
 msgid "Left"
-msgstr ""
+msgstr "Links"
 
 #: src/config/ui/breezeconfigurationui.ui
 msgctxt "@item:inlistbox alignment"
 msgid "Center"
-msgstr ""
+msgstr "Mittig"
 
 #: src/config/ui/breezeconfigurationui.ui
 msgctxt "@item:inlistbox alignment"
 msgid "Center (Full Width)"
-msgstr ""
+msgstr "Mittig (ganze Breite)"
 
 #: src/config/ui/breezeconfigurationui.ui
 msgctxt "@item:inlistbox alignment"
 msgid "Right"
-msgstr ""
+msgstr "Rechts"
 
 #: src/config/ui/breezeconfigurationui.ui
 msgid "Shadows"
-msgstr ""
+msgstr "Schatten"
 
 #: src/config/ui/breezeconfigurationui.ui
 msgid "Shadow size:"
-msgstr ""
+msgstr "Schattengröße:"
 
 #: src/config/ui/breezeconfigurationui.ui
 msgctxt "@item:inlistbox Shadow size:"
 msgid "None"
-msgstr ""
+msgstr "Kein Schatten"
 
 #: src/config/ui/breezeconfigurationui.ui
 msgctxt "@item:inlistbox Shadow size:"
 msgid "Small"
-msgstr ""
+msgstr "Klein"
 
 #: src/config/ui/breezeconfigurationui.ui
 msgctxt "@item:inlistbox Shadow size:"
 msgid "Medium"
-msgstr ""
+msgstr "Mittel"
 
 #: src/config/ui/breezeconfigurationui.ui
 msgctxt "@item:inlistbox Shadow size:"
 msgid "Large"
-msgstr ""
+msgstr "Groß"
 
 #: src/config/ui/breezeconfigurationui.ui
 msgctxt "@item:inlistbox Shadow size:"
 msgid "Very Large"
-msgstr ""
+msgstr "Sehr groß"
 
 #: src/config/ui/breezeconfigurationui.ui
 msgctxt "strength of the shadow (from transparent to opaque)"
 msgid "Shadow strength:"
-msgstr ""
+msgstr "Schattenstärke:"
 
 #: src/config/ui/breezeconfigurationui.ui
 msgid " %"
-msgstr ""
+msgstr " %"
 
 #: src/config/ui/breezeconfigurationui.ui
 msgid "Shadow color:"
-msgstr ""
+msgstr "Schattenfarbe:"

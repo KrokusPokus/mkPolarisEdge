@@ -12,7 +12,7 @@
 #include <QPoint>
 #include <QSize>
 
-namespace MkAuroraeNext
+namespace MkPolarisEdge
 {
 class BoxShadowRenderer
 {
@@ -79,4 +79,4 @@ private:
     QVector<Shadow> m_shadows;
 };
 
-} // namespace MkAuroraeNext
+} // namespace MkPolarisEdge

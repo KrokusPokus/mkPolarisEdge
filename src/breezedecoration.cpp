@@ -34,7 +34,7 @@
 #include <QTextStream>
 #include <QTimer>
 
-K_PLUGIN_FACTORY_WITH_JSON(MkAuroraeNextDecoFactory, "mkauroraenext.json", registerPlugin<MkAuroraeNext::Decoration>(); registerPlugin<MkAuroraeNext::Button>();)
+K_PLUGIN_FACTORY_WITH_JSON(MkPolarisEdgeDecoFactory, "mkpolarisedge.json", registerPlugin<MkPolarisEdge::Decoration>(); registerPlugin<MkPolarisEdge::Button>();)
 
 namespace
 {
@@ -94,15 +94,15 @@ const CompositeShadowParams s_shadowParams[] = {
 inline CompositeShadowParams lookupShadowParams(int size)
 {
     switch (size) {
-    case MkAuroraeNext::InternalSettings::ShadowNone:
+    case MkPolarisEdge::InternalSettings::ShadowNone:
         return s_shadowParams[0];
-    case MkAuroraeNext::InternalSettings::ShadowSmall:
+    case MkPolarisEdge::InternalSettings::ShadowSmall:
         return s_shadowParams[1];
-    case MkAuroraeNext::InternalSettings::ShadowMedium:
+    case MkPolarisEdge::InternalSettings::ShadowMedium:
         return s_shadowParams[2];
-    case MkAuroraeNext::InternalSettings::ShadowLarge:
+    case MkPolarisEdge::InternalSettings::ShadowLarge:
         return s_shadowParams[3];
-    case MkAuroraeNext::InternalSettings::ShadowVeryLarge:
+    case MkPolarisEdge::InternalSettings::ShadowVeryLarge:
         return s_shadowParams[4];
     default:
         // Fallback to the Large size.
@@ -111,7 +111,7 @@ inline CompositeShadowParams lookupShadowParams(int size)
 }
 }
 
-namespace MkAuroraeNext
+namespace MkPolarisEdge
 {
 using KDecoration3::ColorGroup;
 using KDecoration3::ColorRole;
@@ -168,7 +168,7 @@ QColor Decoration::titleBarColor() const
 //________________________________________________________________
 QColor Decoration::fontColor() const
 {
-    // mkAuroraeNext: ActiveTextColor / InactiveTextColor of the theme
+    // mkPolarisEdge: ActiveTextColor / InactiveTextColor of the theme
     if (m_animation->state() == QAbstractAnimation::Running) {
         return KColorUtils::mix(Theme::Text_Inactive, Theme::Text_Active, m_opacity);
     }
@@ -257,7 +257,7 @@ bool Decoration::init()
 //________________________________________________________________
 void Decoration::updateTitleBar()
 {
-    // mkAuroraeNext: the title bar (move area) is everything of the decoration inside the visible frame. The frame
+    // mkPolarisEdge: the title bar (move area) is everything of the decoration inside the visible frame. The frame
     // around it (left, right, the strip above) is the resize area, so it is exactly what can be seen: windows
     // snapped edge to edge do not reach into each other, and a window at the top screen edge can still be resized.
     const qreal scale = window()->nextScale();
@@ -293,7 +293,7 @@ void Decoration::updateAnimationState()
 //________________________________________________________________
 qreal Decoration::borderSize(bool bottom, qreal scale) const
 {
-    // mkAuroraeNext: the frame of the mkAurorae themes, independent of the border size setting of KWin
+    // mkPolarisEdge: the frame of the mkAurorae themes, independent of the border size setting of KWin
     Q_UNUSED(bottom);
     return KDecoration3::snapToPixelGrid(Metrics::Frame_BorderWidth, scale);
 }
@@ -331,7 +331,7 @@ QMarginsF Decoration::bordersFor(qreal scale) const
     const qreal right = isRightEdge() ? 0 : borderSize(false, scale);
     const qreal bottom = (window()->isShaded() || isBottomEdge()) ? 0 : borderSize(true, scale);
 
-    // mkAuroraeNext: TitleEdgeTop + button size + TitleEdgeBottom from the outer edge; the frame strip (resize area)
+    // mkPolarisEdge: TitleEdgeTop + button size + TitleEdgeBottom from the outer edge; the frame strip (resize area)
     // is the top part of it
     const qreal top = KDecoration3::snapToPixelGrid(isMaximized() ? Metrics::TitleBar_TotalHeightMaximized : Metrics::TitleBar_TotalHeight, scale);
     return QMarginsF(left, top, right, bottom);
@@ -341,13 +341,13 @@ void Decoration::recalculateBorders()
 {
     setBorders(bordersFor(window()->nextScale()));
 
-    // mkAuroraeNext: no resize area outside of the visible frame (Breeze extends it by largeSpacing)
+    // mkPolarisEdge: no resize area outside of the visible frame (Breeze extends it by largeSpacing)
     setResizeOnlyBorders(QMarginsF());
 
-    // mkAuroraeNext: the window is rectangular, the frame is always there (Breeze rounds windows without borders)
+    // mkPolarisEdge: the window is rectangular, the frame is always there (Breeze rounds windows without borders)
     setBorderRadius(KDecoration3::BorderRadius());
 
-    // mkAuroraeNext: no outline. KWin draws it outside of the decoration, where it would be visible but not a resize
+    // mkPolarisEdge: no outline. KWin draws it outside of the decoration, where it would be visible but not a resize
     // area; the frame of the mkAurorae themes has its colored edge inside the 4 px border.
     setBorderOutline(KDecoration3::BorderOutline());
 }
@@ -369,7 +369,7 @@ void Decoration::updateButtonsGeometryDelayed()
 //________________________________________________________________
 void Decoration::updateButtonsGeometry()
 {
-    // mkAuroraeNext: buttons 20 x 20 (the 22 x 22 button SVGs scaled like Aurorae does), TitleEdgeTop below the outer
+    // mkPolarisEdge: buttons 20 x 20 (the 22 x 22 button SVGs scaled like Aurorae does), TitleEdgeTop below the outer
     // edge, the first one TitleEdgeLeft from the outer window edge, the last one TitleEdgeRight before it, no spacing
     // (ButtonSpacing=0). Note: they reach one pixel into the frame strip above the title bar, as in Aurorae.
     const qreal scale = window()->scale();
@@ -402,7 +402,7 @@ void Decoration::updateButtonsGeometry()
 //________________________________________________________________
 void Decoration::paint(QPainter *painter, const QRectF &repaintRegion)
 {
-    // mkAuroraeNext: frame and title background of the mkAurorae themes, piece by piece as in decoration.svg.
+    // mkPolarisEdge: frame and title background of the mkAurorae themes, piece by piece as in decoration.svg.
     // Pixel boundaries are integers (logical pixels); only the rounded corners of the active line are antialiased.
     const bool active = window()->isActive();
     const qreal W = size().width();
@@ -546,7 +546,7 @@ void Decoration::paint(QPainter *painter, const QRectF &repaintRegion)
 
 QColor Decoration::highlightColor() const
 {
-    // mkAuroraeNext: the highlight line of the active window, the color variants of the mkAurorae themes
+    // mkPolarisEdge: the highlight line of the active window, the color variants of the mkAurorae themes
     switch (m_internalSettings->activeHighlight()) {
     case InternalSettings::HighlightAccent:   // ColorScheme-ViewFocus in the SVG
         return KColorScheme(QPalette::Active, KColorScheme::View).decoration(KColorScheme::FocusColor).color();
@@ -563,7 +563,7 @@ QColor Decoration::highlightColor() const
 //________________________________________________________________
 void Decoration::paintTitleBar(QPainter *painter, const QRectF &repaintRegion)
 {
-    // mkAuroraeNext: the background is drawn in paint(); here only the caption and the buttons
+    // mkPolarisEdge: the background is drawn in paint(); here only the caption and the buttons
     if (!QRectF(QPointF(0, 0), QSizeF(size().width(), borderTop())).intersects(repaintRegion)) {
         return;
     }
@@ -583,14 +583,14 @@ void Decoration::paintTitleBar(QPainter *painter, const QRectF &repaintRegion)
 //________________________________________________________________
 int Decoration::buttonSize() const
 {
-    // mkAuroraeNext: Aurorae default button size
+    // mkPolarisEdge: Aurorae default button size
     return Metrics::TitleBar_ButtonSize;
 }
 
 //________________________________________________________________
 qreal Decoration::captionHeight() const
 {
-    // mkAuroraeNext: the caption is centered in the band of the buttons
+    // mkPolarisEdge: the caption is centered in the band of the buttons
     return KDecoration3::snapToPixelGrid(Metrics::TitleBar_ButtonSize, window()->scale());
 }
 

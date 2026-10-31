@@ -12,7 +12,7 @@
 #include <QList>
 #include <QSharedPointer>
 
-namespace MkAuroraeNext
+namespace MkPolarisEdge
 {
 //* convenience typedefs
 using InternalSettingsPtr = QSharedPointer<InternalSettings>;
@@ -35,7 +35,7 @@ static constexpr int TitleBar_BottomMargin = 2;
 static constexpr int TitleBar_SideMargin = 2;
 static constexpr int TitleBar_ButtonSpacing = 2;
 
-//* mkAuroraeNext: geometry of the mkAurorae themes (logical pixels, from decoration.svg, the button SVGs and the rc file).
+//* mkPolarisEdge: geometry of the mkAurorae themes (logical pixels, from decoration.svg, the button SVGs and the rc file).
 // The resize area is exactly the visible frame: there are no resize borders outside of it.
 static constexpr int Frame_BorderWidth = 4;     // left, right, bottom and the strip above the title bar
 static constexpr int TitleBar_EdgeTop = 3;      // TitleEdgeTop: from the outer edge to the buttons
@@ -55,7 +55,7 @@ static constexpr int TitleBar_EdgeRightMaximized = 0;
 static constexpr int TitleBar_TotalHeightMaximized = TitleBar_EdgeTopMaximized + TitleBar_ButtonSize + TitleBar_EdgeBottomMaximized;
 }
 
-//* mkAuroraeNext: colors of the mkAurorae themes (decoration.svg)
+//* mkPolarisEdge: colors of the mkAurorae themes (decoration.svg)
 namespace Theme
 {
 inline const QColor Rim(0x22, 0x22, 0x22);          // outermost pixel

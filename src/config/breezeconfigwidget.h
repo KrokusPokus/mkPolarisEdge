@@ -19,7 +19,7 @@
 #include <QSharedPointer>
 #include <QWidget>
 
-namespace MkAuroraeNext
+namespace MkPolarisEdge
 {
 //_____________________________________________
 class ConfigWidget : public KCModule
