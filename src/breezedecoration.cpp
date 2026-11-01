@@ -109,6 +109,57 @@ inline CompositeShadowParams lookupShadowParams(int size)
         return s_shadowParams[3];
     }
 }
+
+// mkPolarisEdge: helpers for painting the frame
+QBrush verticalGradient(qreal y1, qreal y2, const QColor &c1, const QColor &c2)
+{
+    QLinearGradient g(0, y1, 0, y2);
+    g.setColorAt(0, c1);
+    g.setColorAt(1, c2);
+    return QBrush(g);
+}
+
+// rectangle whose corner (0 top left, 1 top right, 2 bottom left, 3 bottom right) is a quarter ellipse with the
+// radii rx, ry, as the corner paths of decoration.svg ("A 3,3 ..."); a radius may be as large as the rectangle
+// (QPainterPath::addRoundedRect would limit it to half the width)
+QPainterPath cornerPath(const QRectF &r, int corner, qreal rx, qreal ry)
+{
+    const qreal dx = 2 * rx;
+    const qreal dy = 2 * ry;
+    QPainterPath p;
+    switch (corner) {
+    case 0:
+        p.moveTo(r.left(), r.bottom());
+        p.lineTo(r.left(), r.top() + ry);
+        p.arcTo(QRectF(r.left(), r.top(), dx, dy), 180, -90);
+        p.lineTo(r.right(), r.top());
+        p.lineTo(r.right(), r.bottom());
+        break;
+    case 1:
+        p.moveTo(r.left(), r.top());
+        p.lineTo(r.right() - rx, r.top());
+        p.arcTo(QRectF(r.right() - dx, r.top(), dx, dy), 90, -90);
+        p.lineTo(r.right(), r.bottom());
+        p.lineTo(r.left(), r.bottom());
+        break;
+    case 2:
+        p.moveTo(r.left(), r.top());
+        p.lineTo(r.right(), r.top());
+        p.lineTo(r.right(), r.bottom());
+        p.lineTo(r.left() + rx, r.bottom());
+        p.arcTo(QRectF(r.left(), r.bottom() - dy, dx, dy), 270, -90);
+        break;
+    default:
+        p.moveTo(r.left(), r.top());
+        p.lineTo(r.right(), r.top());
+        p.lineTo(r.right(), r.bottom() - ry);
+        p.arcTo(QRectF(r.right() - dx, r.bottom() - dy, dx, dy), 0, -90);
+        p.lineTo(r.left(), r.bottom());
+        break;
+    }
+    p.closeSubpath();
+    return p;
+}
 }
 
 namespace MkPolarisEdge
@@ -403,145 +454,121 @@ void Decoration::updateButtonsGeometry()
 void Decoration::paint(QPainter *painter, const QRectF &repaintRegion)
 {
     // mkPolarisEdge: frame and title background of the mkAurorae themes, piece by piece as in decoration.svg.
-    // Pixel boundaries are integers (logical pixels); only the rounded corners of the active line are antialiased.
-    const bool active = window()->isActive();
-    const qreal W = size().width();
-    const qreal H = size().height();
-    const qreal T = Metrics::TitleBar_TotalHeight;   // 26: separators in rows T - 2 and T - 1
-    const bool framed = !isMaximized();
-
+    // Two independent layers: the regular frame, the same for every window, and over it the highlight of the
+    // active window. The highlight only paints its own shape and never changes the frame below it.
     painter->save();
     painter->setPen(Qt::NoPen);
     painter->setRenderHint(QPainter::Antialiasing, true);
 
-    auto fill = [painter](qreal x, qreal y, qreal w, qreal h, const QBrush &brush) {
-        painter->fillRect(QRectF(x, y, w, h), brush);
-    };
-    auto vertical = [](qreal y1, qreal y2, const QColor &c1, const QColor &c2) {
-        QLinearGradient g(0, y1, 0, y2);
-        g.setColorAt(0, c1);
-        g.setColorAt(1, c2);
-        return QBrush(g);
-    };
-    // rectangle whose corner (0 top left, 1 top right, 2 bottom left, 3 bottom right) is a quarter ellipse with the
-    // radii rx, ry, as the corner paths of decoration.svg ("A 3,3 ..."); a radius may be as large as the rectangle
-    // (QPainterPath::addRoundedRect would limit it to half the width)
-    auto cornerPath = [](const QRectF &r, int corner, qreal rx, qreal ry) {
-        const qreal dx = 2 * rx;
-        const qreal dy = 2 * ry;
-        QPainterPath p;
-        switch (corner) {
-        case 0:
-            p.moveTo(r.left(), r.bottom());
-            p.lineTo(r.left(), r.top() + ry);
-            p.arcTo(QRectF(r.left(), r.top(), dx, dy), 180, -90);
-            p.lineTo(r.right(), r.top());
-            p.lineTo(r.right(), r.bottom());
-            break;
-        case 1:
-            p.moveTo(r.left(), r.top());
-            p.lineTo(r.right() - rx, r.top());
-            p.arcTo(QRectF(r.right() - dx, r.top(), dx, dy), 90, -90);
-            p.lineTo(r.right(), r.bottom());
-            p.lineTo(r.left(), r.bottom());
-            break;
-        case 2:
-            p.moveTo(r.left(), r.top());
-            p.lineTo(r.right(), r.top());
-            p.lineTo(r.right(), r.bottom());
-            p.lineTo(r.left() + rx, r.bottom());
-            p.arcTo(QRectF(r.left(), r.bottom() - dy, dx, dy), 270, -90);
-            break;
-        default:
-            p.moveTo(r.left(), r.top());
-            p.lineTo(r.right(), r.top());
-            p.lineTo(r.right(), r.bottom() - ry);
-            p.arcTo(QRectF(r.right() - dx, r.bottom() - dy, dx, dy), 0, -90);
-            p.lineTo(r.left(), r.bottom());
-            break;
-        }
-        p.closeSubpath();
-        return p;
-    };
-
-    // title gradient over its area (measured on the Aurorae rendering): active rows 2-23, inactive rows 2-24 (an
-    // inactive window has no separator in row 24)
-    const QBrush titleBrush = active ? vertical(2, T - 2, Theme::Title_Light, Theme::Title_Dark) : vertical(2, T - 1, Theme::Title_Dark, Theme::Title_Light);
-
-    if (!framed) {
+    if (isMaximized()) {
         // maximized: the title area is plain (measured on the Aurorae rendering of decoration-maximized-center)
-        fill(0, 0, W, borderTop(), Theme::Title_Maximized);
+        painter->fillRect(QRectF(0, 0, size().width(), borderTop()), Theme::Title_Maximized);
     } else {
-        // the active window gets a colored line with rounded corners over the regular frame; without highlight (and
-        // for inactive windows) the regular frame is drawn: gray line, square corners
-        const bool highlight = active && m_internalSettings->activeHighlight() != InternalSettings::HighlightNone;
-        const QColor line = highlight ? highlightColor() : Theme::Line_Inactive;
-        const bool bold = highlight && m_internalSettings->activeHighlightBold();
-        const qreal b = bold ? 0 : 1;   // first row / column of the straight line pieces
-
-        // pixel 0: rim; in the top corners a gradient over 26 px, the top row lighter
-        fill(0, 0, W, H, Theme::Rim);
-        fill(4, 0, W - 8, 1, Theme::Rim_Top);
-        fill(0, 0, 4, T, vertical(0, T, Theme::Rim_Top, Theme::Rim));
-        fill(W - 4, 0, 4, T, vertical(0, T, Theme::Rim_Top, Theme::Rim));
-
-        // straight pieces of the line, and pixels 2 and 3 inside it
-        fill(4, b, W - 8, 2 - b, highlight ? line : Theme::Line_InactiveTop);   // top
-        fill(b, T, 4 - b, H - T - 4, line);              // left
-        fill(W - 4, T, 4 - b, H - T - 4, line);          // right
-        fill(4, H - 4, W - 8, 4 - b, line);              // bottom
-        fill(2, T, 2, H - T - 4, Theme::Inner);
-        fill(W - 4, T, 2, H - T - 4, Theme::Inner);
-        fill(4, H - 4, W - 8, 2, Theme::Inner);
-
-        if (highlight) {
-            // corner pieces: line with outer radius 3, inside radius 2. The bold variant scales the line pieces of
-            // decoration.svg to the outer edge: 4 px wide, radius 4 (top corners: 4 x 3.12, scaled by 1.04 vertically)
-            const qreal o = bold ? 0 : 1;   // outer edge of the corner line pieces
-            const qreal rx = bold ? Theme::Corner_OuterRadiusBold : Theme::Corner_OuterRadius;
-            const qreal ryTop = bold ? Theme::Corner_OuterRadiusBoldTop : Theme::Corner_OuterRadius;
-            painter->fillPath(cornerPath(QRectF(o, o, 4 - o, T - o), 0, rx, ryTop), line);
-            painter->fillPath(cornerPath(QRectF(W - 4, o, 4 - o, T - o), 1, rx, ryTop), line);
-            painter->fillPath(cornerPath(QRectF(o, H - 4, 4 - o, 4 - o), 2, rx, rx), line);
-            painter->fillPath(cornerPath(QRectF(W - 4, H - 4, 4 - o, 4 - o), 3, rx, rx), line);
-            const qreal ri = Theme::Corner_InnerRadius;
-            painter->fillPath(cornerPath(QRectF(2, 2, 2, T - 4), 0, ri, ri), titleBrush);
-            painter->fillPath(cornerPath(QRectF(W - 4, 2, 2, T - 4), 1, ri, ri), titleBrush);
-            painter->fillPath(cornerPath(QRectF(2, H - 4, 2, 2), 2, ri, ri), Theme::Inner);
-            painter->fillPath(cornerPath(QRectF(W - 4, H - 4, 2, 2), 3, ri, ri), Theme::Inner);
-        } else {
-            // square corners, the top row of the line lighter
-            fill(1, 1, 3, T - 1, line);
-            fill(W - 4, 1, 3, T - 1, line);
-            fill(1, 1, 3, 1, Theme::Line_InactiveTop);
-            fill(W - 4, 1, 3, 1, Theme::Line_InactiveTop);
-            fill(1, H - 4, 3, 3, line);
-            fill(W - 4, H - 4, 3, 3, line);
-            fill(2, 2, 2, active ? T - 4 : T - 3, titleBrush);
-            fill(W - 4, 2, 2, active ? T - 4 : T - 3, titleBrush);
-            fill(2, H - 4, 2, 2, Theme::Inner);
-            fill(W - 4, H - 4, 2, 2, Theme::Inner);
+        paintFrame(painter);
+        if (window()->isActive() && m_internalSettings->activeHighlight() != InternalSettings::HighlightNone) {
+            paintHighlight(painter);
         }
-
-        // inside the top corner pieces below the title gradient
-        if (active) {
-            fill(2, T - 2, 2, 2, Theme::Inner);
-            fill(W - 4, T - 2, 2, 2, Theme::Inner);
-        } else {
-            fill(2, T - 1, 2, 1, Theme::Separator_Inactive);
-            fill(W - 4, T - 1, 2, 1, Theme::Separator_Inactive);
-        }
-
-        // title gradient and the separator rows between the corner pieces
-        fill(4, 2, W - 8, active ? T - 4 : T - 3, titleBrush);
-        if (active) {
-            fill(4, T - 2, W - 8, 1, Theme::Separator);
-        }
-        fill(4, T - 1, W - 8, 1, active ? Theme::Separator_Active : Theme::Separator_Inactive);
     }
     painter->restore();
 
     paintTitleBar(painter, repaintRegion);
+}
+
+void Decoration::paintFrame(QPainter *painter)
+{
+    // mkPolarisEdge: the regular frame (the gray mkAurorae theme): gray line in pixel 1, square corners, its top
+    // row lighter. Pixel boundaries are integers (logical pixels). Only the title area differs between active and
+    // inactive windows.
+    const bool active = window()->isActive();
+    const qreal W = size().width();
+    const qreal H = size().height();
+    const qreal T = Metrics::TitleBar_TotalHeight;   // 26: separators in rows T - 2 and T - 1
+    const QColor &line = Theme::Line_Inactive;
+
+    auto fill = [painter](qreal x, qreal y, qreal w, qreal h, const QBrush &brush) {
+        painter->fillRect(QRectF(x, y, w, h), brush);
+    };
+
+    // title gradient over its area (measured on the Aurorae rendering): active rows 2-23, inactive rows 2-24 (an
+    // inactive window has no separator in row 24)
+    const QBrush titleBrush =
+        active ? verticalGradient(2, T - 2, Theme::Title_Light, Theme::Title_Dark) : verticalGradient(2, T - 1, Theme::Title_Dark, Theme::Title_Light);
+
+    // pixel 0: rim; in the top corners a gradient over 26 px, the top row lighter
+    fill(0, 0, W, H, Theme::Rim);
+    fill(4, 0, W - 8, 1, Theme::Rim_Top);
+    fill(0, 0, 4, T, verticalGradient(0, T, Theme::Rim_Top, Theme::Rim));
+    fill(W - 4, 0, 4, T, verticalGradient(0, T, Theme::Rim_Top, Theme::Rim));
+
+    // pixel 1: the line; pixels 2 and 3: inside
+    fill(4, 1, W - 8, 1, Theme::Line_InactiveTop);   // top
+    fill(1, T, 1, H - T - 4, line);                  // left
+    fill(W - 2, T, 1, H - T - 4, line);              // right
+    fill(4, H - 2, W - 8, 1, line);                  // bottom
+    fill(2, T, 2, H - T - 4, Theme::Inner);
+    fill(W - 4, T, 2, H - T - 4, Theme::Inner);
+    fill(4, H - 4, W - 8, 2, Theme::Inner);
+
+    // square corners, the top row of the line lighter
+    fill(1, 1, 3, T - 1, line);
+    fill(W - 4, 1, 3, T - 1, line);
+    fill(1, 1, 3, 1, Theme::Line_InactiveTop);
+    fill(W - 4, 1, 3, 1, Theme::Line_InactiveTop);
+    fill(1, H - 4, 3, 3, line);
+    fill(W - 4, H - 4, 3, 3, line);
+    fill(2, 2, 2, active ? T - 4 : T - 3, titleBrush);
+    fill(W - 4, 2, 2, active ? T - 4 : T - 3, titleBrush);
+    fill(2, H - 4, 2, 2, Theme::Inner);
+    fill(W - 4, H - 4, 2, 2, Theme::Inner);
+
+    // inside the top corner pieces below the title gradient
+    if (active) {
+        fill(2, T - 2, 2, 2, Theme::Inner);
+        fill(W - 4, T - 2, 2, 2, Theme::Inner);
+    } else {
+        fill(2, T - 1, 2, 1, Theme::Separator_Inactive);
+        fill(W - 4, T - 1, 2, 1, Theme::Separator_Inactive);
+    }
+
+    // title gradient and the separator rows between the corner pieces
+    fill(4, 2, W - 8, active ? T - 4 : T - 3, titleBrush);
+    if (active) {
+        fill(4, T - 2, W - 8, 1, Theme::Separator);
+    }
+    fill(4, T - 1, W - 8, 1, active ? Theme::Separator_Active : Theme::Separator_Inactive);
+}
+
+void Decoration::paintHighlight(QPainter *painter)
+{
+    // mkPolarisEdge: the highlight of the active window (the color variants of the mkAurorae themes), painted over
+    // the regular frame: a colored line in pixel 1 with rounded corners, outer radius 3, inner radius 2. The bold
+    // variant ("B" themes) scales the line pieces of decoration.svg to the outer edge: pixels 0 and 1, radius 4
+    // (top corners: 4 x 3.12, scaled by 1.04 vertically).
+    const qreal W = size().width();
+    const qreal H = size().height();
+    const qreal T = Metrics::TitleBar_TotalHeight;
+    const QColor line = highlightColor();
+    const bool bold = m_internalSettings->activeHighlightBold();
+    const qreal o = bold ? 0 : 1;   // outer edge of the line
+    const qreal w = 2 - o;          // width of the line
+
+    // straight pieces
+    painter->fillRect(QRectF(4, o, W - 8, w), line);           // top
+    painter->fillRect(QRectF(o, T, w, H - T - 4), line);       // left
+    painter->fillRect(QRectF(W - 2, T, w, H - T - 4), line);   // right
+    painter->fillRect(QRectF(4, H - 2, W - 8, w), line);       // bottom
+
+    // corner pieces: the area between the outer and the inner arc
+    const qreal rx = bold ? Theme::Corner_OuterRadiusBold : Theme::Corner_OuterRadius;
+    const qreal ryTop = bold ? Theme::Corner_OuterRadiusBoldTop : Theme::Corner_OuterRadius;
+    const qreal ri = Theme::Corner_InnerRadius;
+    auto corner = [&](const QRectF &outer, const QRectF &inner, int c, qreal ry) {
+        painter->fillPath(cornerPath(outer, c, rx, ry).subtracted(cornerPath(inner, c, ri, ri)), line);
+    };
+    corner(QRectF(o, o, 4 - o, T - o), QRectF(2, 2, 2, T - 2), 0, ryTop);
+    corner(QRectF(W - 4, o, 4 - o, T - o), QRectF(W - 4, 2, 2, T - 2), 1, ryTop);
+    corner(QRectF(o, H - 4, 4 - o, 4 - o), QRectF(2, H - 4, 2, 2), 2, rx);
+    corner(QRectF(W - 4, H - 4, 4 - o, 4 - o), QRectF(W - 4, H - 4, 2, 2), 3, rx);
 }
 
 QColor Decoration::highlightColor() const

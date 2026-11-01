@@ -100,6 +100,9 @@ private:
     QPair<QRectF, Qt::Alignment> captionRect() const;
 
     void createButtons();
+    //* mkPolarisEdge: the regular frame, and the highlight of the active window painted over it
+    void paintFrame(QPainter *painter);
+    void paintHighlight(QPainter *painter);
     void paintTitleBar(QPainter *painter, const QRectF &repaintRegion);
     void updateShadow();
     std::shared_ptr<KDecoration3::DecorationShadow> createShadowObject(const float strengthScale);
