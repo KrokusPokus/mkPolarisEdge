@@ -101,7 +101,7 @@ void ConfigWidget::load()
     m_internalSettings = InternalSettingsPtr(new InternalSettings());
     loadSettings(*m_internalSettings);
     setUi(*m_internalSettings);
-    setNeedsSave(false);
+    updateChanged();
 }
 
 //_________________________________________________________
@@ -124,7 +124,7 @@ void ConfigWidget::save()
     KConfigGroup(m_internalSettings->config(), QStringLiteral("Windeco")).deleteEntry("ActiveHighlightBold");
     m_internalSettings->config()->sync();
     m_configuration->sync();
-    setNeedsSave(false);
+    updateChanged();
 
     // needed to tell kwin to reload when running from external kcmshell
     {
@@ -142,9 +142,10 @@ void ConfigWidget::save()
 //_________________________________________________________
 void ConfigWidget::defaults()
 {
-    m_internalSettings = InternalSettingsPtr(new InternalSettings());
-    m_internalSettings->setDefaults();
-    setUi(*m_internalSettings);
+    // only the ui shows the defaults; m_internalSettings stays the saved state, so updateChanged() sees the difference
+    InternalSettings defaultSettings;
+    defaultSettings.setDefaults();
+    setUi(defaultSettings);
     updateChanged();
 }
 
@@ -155,16 +156,24 @@ void ConfigWidget::updateChanged()
         return;
     }
 
-    const bool modified = m_ui.activeHighlight->currentIndex() != m_internalSettings->activeHighlight()
-        || m_ui.highlightCustomColor->color() != m_internalSettings->activeHighlightCustomColor()
-        || highlightWidth() != m_internalSettings->activeHighlightWidth()
-        || m_ui.highlightRadius->value() != m_internalSettings->activeHighlightRadius()
-        || m_ui.titleAlignment->currentIndex() != m_internalSettings->titleAlignment()
-        || m_ui.shadowSize->currentIndex() != m_internalSettings->shadowSize()
-        || qRound(qreal(m_ui.shadowStrength->value() * 255) / 100) != m_internalSettings->shadowStrength()
-        || m_ui.shadowColor->color() != m_internalSettings->shadowColor();
+    // "Apply" for a difference to the saved state, "Defaults" only while the ui differs from the defaults
+    InternalSettings defaultSettings;
+    defaultSettings.setDefaults();
+    setNeedsSave(differsFrom(*m_internalSettings));
+    setRepresentsDefaults(!differsFrom(defaultSettings));
+}
 
-    setNeedsSave(modified);
+//_______________________________________________
+bool ConfigWidget::differsFrom(const InternalSettings &settings) const
+{
+    return m_ui.activeHighlight->currentIndex() != settings.activeHighlight()
+        || m_ui.highlightCustomColor->color() != settings.activeHighlightCustomColor()
+        || highlightWidth() != settings.activeHighlightWidth()
+        || m_ui.highlightRadius->value() != settings.activeHighlightRadius()
+        || m_ui.titleAlignment->currentIndex() != settings.titleAlignment()
+        || m_ui.shadowSize->currentIndex() != settings.shadowSize()
+        || qRound(qreal(m_ui.shadowStrength->value() * 255) / 100) != settings.shadowStrength()
+        || m_ui.shadowColor->color() != settings.shadowColor();
 }
 
 }

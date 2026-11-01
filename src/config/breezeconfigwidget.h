@@ -55,6 +55,9 @@ private:
     //* the highlight width to save: the spin box value, or the kept one while it shows the 0 of "None"
     int highlightWidth() const;
 
+    //* whether the ui shows other values than settings
+    bool differsFrom(const InternalSettings &settings) const;
+
     //* assigns the settings to the ui
     void setUi(const InternalSettings &settings);
 
