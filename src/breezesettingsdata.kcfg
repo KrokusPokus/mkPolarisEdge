@@ -43,8 +43,8 @@
       <default>AlignLeft</default>
     </entry>
 
-    <!-- highlight of the active window: a colored line over the regular frame, as in the color variants of the
-         mkAurorae themes; HighlightNone draws the regular frame (as for inactive windows, the gray mkAurorae theme) -->
+    <!-- highlight of the active window: a colored line instead of the gray one, as in the color variants of the
+         mkAurorae themes; HighlightNone keeps the gray line (as for inactive windows, the gray mkAurorae theme) -->
     <entry name="ActiveHighlight" type="Enum">
       <choices>
           <choice name="HighlightNone" />

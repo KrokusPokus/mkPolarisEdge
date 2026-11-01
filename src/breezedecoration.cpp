@@ -413,8 +413,9 @@ void Decoration::updateButtonsGeometry()
 void Decoration::paint(QPainter *painter, const QRectF &repaintRegion)
 {
     // mkPolarisEdge: frame and title background of the mkAurorae themes, piece by piece as in decoration.svg.
-    // Two independent layers: the regular frame, the same for every window, and over it the highlight of the
-    // active window. The highlight only paints its own shape and never changes the frame below it.
+    // Two layers: the frame background without any line, then exactly one line over it: the colored highlight of
+    // the active window, or else the gray line (inactive windows, and HighlightNone). Both lines are painted by
+    // paintLine(); nothing of the gray line remains below the highlight, so its rounded corners show the background.
     painter->save();
     painter->setPen(Qt::NoPen);
     painter->setRenderHint(QPainter::Antialiasing, true);
@@ -425,7 +426,11 @@ void Decoration::paint(QPainter *painter, const QRectF &repaintRegion)
     } else {
         paintFrame(painter);
         if (window()->isActive() && m_internalSettings->activeHighlight() != InternalSettings::HighlightNone) {
-            paintHighlight(painter);
+            paintLine(painter, highlightColor(), m_internalSettings->activeHighlightWidth(), m_internalSettings->activeHighlightRadius());
+        } else {
+            // the gray mkAurorae theme: thin line, square corners, its top row lighter
+            paintLine(painter, Theme::Line_Inactive, 1, 0);
+            painter->fillRect(QRectF(1, 1, size().width() - 2, 1), Theme::Line_InactiveTop);
         }
     }
     painter->restore();
@@ -435,14 +440,14 @@ void Decoration::paint(QPainter *painter, const QRectF &repaintRegion)
 
 void Decoration::paintFrame(QPainter *painter)
 {
-    // mkPolarisEdge: the regular frame (the gray mkAurorae theme): gray line in pixel 1, square corners, its top
-    // row lighter. Pixel boundaries are integers (logical pixels). Only the title area differs between active and
-    // inactive windows.
+    // mkPolarisEdge: the frame background without the line: rim in pixel 0, pixel 1 (where the line goes) as rim
+    // too, pixels 2 and 3 inside, title gradient and separators. Square everywhere; the line and its corners are
+    // painted over it by paintLine(). Pixel boundaries are integers (logical pixels). Only the title area differs
+    // between active and inactive windows.
     const bool active = window()->isActive();
     const qreal W = size().width();
     const qreal H = size().height();
     const qreal T = Metrics::TitleBar_TotalHeight;   // 26: separators in rows T - 2 and T - 1
-    const QColor &line = Theme::Line_Inactive;
 
     auto fill = [painter](qreal x, qreal y, qreal w, qreal h, const QBrush &brush) {
         painter->fillRect(QRectF(x, y, w, h), brush);
@@ -453,28 +458,18 @@ void Decoration::paintFrame(QPainter *painter)
     const QBrush titleBrush =
         active ? verticalGradient(2, T - 2, Theme::Title_Light, Theme::Title_Dark) : verticalGradient(2, T - 1, Theme::Title_Dark, Theme::Title_Light);
 
-    // pixel 0: rim; in the top corners a gradient over 26 px, the top row lighter
+    // pixels 0 and 1: rim; in the top corners a gradient over 26 px, the top row lighter
     fill(0, 0, W, H, Theme::Rim);
     fill(4, 0, W - 8, 1, Theme::Rim_Top);
     fill(0, 0, 4, T, verticalGradient(0, T, Theme::Rim_Top, Theme::Rim));
     fill(W - 4, 0, 4, T, verticalGradient(0, T, Theme::Rim_Top, Theme::Rim));
 
-    // pixel 1: the line; pixels 2 and 3: inside
-    fill(4, 1, W - 8, 1, Theme::Line_InactiveTop);   // top
-    fill(1, T, 1, H - T - 4, line);                  // left
-    fill(W - 2, T, 1, H - T - 4, line);              // right
-    fill(4, H - 2, W - 8, 1, line);                  // bottom
+    // pixels 2 and 3: inside
     fill(2, T, 2, H - T - 4, Theme::Inner);
     fill(W - 4, T, 2, H - T - 4, Theme::Inner);
     fill(4, H - 4, W - 8, 2, Theme::Inner);
 
-    // square corners, the top row of the line lighter
-    fill(1, 1, 3, T - 1, line);
-    fill(W - 4, 1, 3, T - 1, line);
-    fill(1, 1, 3, 1, Theme::Line_InactiveTop);
-    fill(W - 4, 1, 3, 1, Theme::Line_InactiveTop);
-    fill(1, H - 4, 3, 3, line);
-    fill(W - 4, H - 4, 3, 3, line);
+    // corners: pixels 2 and 3
     fill(2, 2, 2, active ? T - 4 : T - 3, titleBrush);
     fill(W - 4, 2, 2, active ? T - 4 : T - 3, titleBrush);
     fill(2, H - 4, 2, 2, Theme::Inner);
@@ -497,24 +492,22 @@ void Decoration::paintFrame(QPainter *painter)
     fill(4, T - 1, W - 8, 1, active ? Theme::Separator_Active : Theme::Separator_Inactive);
 }
 
-void Decoration::paintHighlight(QPainter *painter)
+void Decoration::paintLine(QPainter *painter, const QColor &line, int width, qreal R)
 {
-    // mkPolarisEdge: the highlight of the active window (the color variants of the mkAurorae themes), painted over
-    // the regular frame: a colored line of ActiveHighlightWidth pixel rows of the 4 px frame. Width 1 is the thin line
-    // in pixel 1, 2 the bold line ("B" themes) in pixels 0 and 1, 3 and 4 grow one row further in each. Its corners
-    // are concentric arcs. The setting ActiveHighlightRadius is the radius at pixel edge 0, the outer edge of the
-    // frame (also when the line starts at pixel 1); every pixel edge further in has a radius 1 smaller, down to 0
-    // (default 4: bold outer 4, thin outer 3, inner 2, as in the mkAurorae themes; 0: square corners).
+    // mkPolarisEdge: the line of the frame, painted over the background of paintFrame(): the gray line (width 1,
+    // radius 0) or the highlight of the active window (the color variants of the mkAurorae themes, settings
+    // ActiveHighlightWidth and ActiveHighlightRadius). It covers width pixel rows of the 4 px frame: width 1 is the
+    // thin line in pixel 1, 2 the bold line ("B" themes) in pixels 0 and 1, 3 and 4 grow one row further in each.
+    // Its corners are concentric arcs. R is the radius at pixel edge 0, the outer edge of the frame (also when the
+    // line starts at pixel 1); every pixel edge further in has a radius 1 smaller, down to 0 (default 4: bold outer
+    // 4, thin outer 3, inner 2, as in the mkAurorae themes; 0: square corners).
     const qreal W = size().width();
     const qreal H = size().height();
-    const qreal R = m_internalSettings->activeHighlightRadius();
-    const int width = m_internalSettings->activeHighlightWidth();
     const qreal o = width == 1 ? 1 : 0;       // outer edge of the line
     const qreal i = width == 1 ? 2 : width;   // inner edge of the line
     const qreal ro = qMax<qreal>(0, R - o);                              // radius of the outer edge
     const qreal ri = qMax<qreal>(0, R - i);                              // radius of the inner edge
     const qreal c = qMax(R, i);   // the corner pieces reach from the outer edge to here, the straight pieces start here
-    const QColor line = highlightColor();
 
     // straight pieces: rectangles (much cheaper to rasterize than a path over the whole window height)
     painter->fillRect(QRectF(c, o, W - 2 * c, i - o), line);       // top
