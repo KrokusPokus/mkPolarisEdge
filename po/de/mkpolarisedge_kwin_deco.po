@@ -2,8 +2,8 @@
 msgid ""
 msgstr ""
 "Project-Id-Version: mkpolarisedge\n"
-"POT-Creation-Date: 2026-10-31 10:01\n"
-"PO-Revision-Date: 2026-10-31 12:00+0100\n"
+"POT-Creation-Date: 2026-11-01 13:39\n"
+"PO-Revision-Date: 2026-11-01 12:00+0100\n"
 "Last-Translator: KrokusPokus\n"
 "Language-Team: German\n"
 "Language: de\n"
@@ -63,6 +63,22 @@ msgstr "Breite Hervorhebung"
 msgid "2 px highlight line, as in the B variants of the mkAurorae themes"
 msgstr ""
 "Hervorhebungslinie 2 px breit, wie bei den B-Varianten der mkAurorae-Designs"
+
+#: src/config/ui/breezeconfigurationui.ui
+msgid "Corner radius:"
+msgstr "Eckradius:"
+
+#: src/config/ui/breezeconfigurationui.ui
+msgid ""
+"Radius of the rounded corners of the highlight, at the outer edge of the "
+"bold line (the thin line: 1 px less; 0: square corners)"
+msgstr ""
+"Radius der abgerundeten Ecken der Hervorhebung, an der Außenkante der "
+"breiten Linie (die schmale Linie: 1 px weniger; 0: eckig)"
+
+#: src/config/ui/breezeconfigurationui.ui
+msgid " px"
+msgstr " px"
 
 #: src/config/ui/breezeconfigurationui.ui
 msgid "Title alignment:"

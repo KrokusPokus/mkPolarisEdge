@@ -2,7 +2,7 @@
 msgid ""
 msgstr ""
 "Project-Id-Version: mkpolarisedge\n"
-"POT-Creation-Date: 2026-10-31 10:01\n"
+"POT-Creation-Date: 2026-11-01 13:39\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
@@ -50,6 +50,18 @@ msgstr ""
 
 #: src/config/ui/breezeconfigurationui.ui
 msgid "2 px highlight line, as in the B variants of the mkAurorae themes"
+msgstr ""
+
+#: src/config/ui/breezeconfigurationui.ui
+msgid "Corner radius:"
+msgstr ""
+
+#: src/config/ui/breezeconfigurationui.ui
+msgid "Radius of the rounded corners of the highlight, at the outer edge of the bold line (the thin line: 1 px less; 0: square corners)"
+msgstr ""
+
+#: src/config/ui/breezeconfigurationui.ui
+msgid " px"
 msgstr ""
 
 #: src/config/ui/breezeconfigurationui.ui

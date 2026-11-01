@@ -35,6 +35,7 @@ ConfigWidget::ConfigWidget(QObject *parent, const KPluginMetaData &data, const Q
     connect(m_ui.activeHighlight, &QComboBox::currentIndexChanged, this, &ConfigWidget::updateCustomColorVisibility);
     connect(m_ui.highlightCustomColor, &KColorButton::changed, this, &ConfigWidget::updateChanged);
     connect(m_ui.highlightBold, &QAbstractButton::clicked, this, &ConfigWidget::updateChanged);
+    connect(m_ui.highlightRadius, &QSpinBox::valueChanged, this, &ConfigWidget::updateChanged);
     connect(m_ui.titleAlignment, &QComboBox::currentIndexChanged, this, &ConfigWidget::updateChanged);
     connect(m_ui.shadowSize, &QComboBox::currentIndexChanged, this, &ConfigWidget::updateChanged);
     connect(m_ui.shadowStrength, &QSpinBox::valueChanged, this, &ConfigWidget::updateChanged);
@@ -48,6 +49,7 @@ void ConfigWidget::setUi(const InternalSettings &settings)
     m_ui.activeHighlight->setCurrentIndex(settings.activeHighlight());
     m_ui.highlightCustomColor->setColor(settings.activeHighlightCustomColor());
     m_ui.highlightBold->setChecked(settings.activeHighlightBold());
+    m_ui.highlightRadius->setValue(settings.activeHighlightRadius());
     m_ui.titleAlignment->setCurrentIndex(settings.titleAlignment());
     m_ui.shadowSize->setCurrentIndex(std::min<int>(settings.shadowSize(), InternalSettings::ShadowVeryLarge));
     m_ui.shadowStrength->setValue(qRound(qreal(settings.shadowStrength() * 100) / 255));
@@ -59,8 +61,11 @@ void ConfigWidget::setUi(const InternalSettings &settings)
 void ConfigWidget::updateCustomColorVisibility()
 {
     m_ui.highlightCustomColor->setVisible(m_ui.activeHighlight->currentIndex() == InternalSettings::HighlightCustom);
-    // without highlight the regular frame is drawn, its width is fixed
-    m_ui.highlightBold->setEnabled(m_ui.activeHighlight->currentIndex() != InternalSettings::HighlightNone);
+    // without highlight the regular frame is drawn, its width and corners are fixed
+    const bool highlight = m_ui.activeHighlight->currentIndex() != InternalSettings::HighlightNone;
+    m_ui.highlightBold->setEnabled(highlight);
+    m_ui.highlightRadiusLabel->setEnabled(highlight);
+    m_ui.highlightRadius->setEnabled(highlight);
 }
 
 //_________________________________________________________
@@ -81,6 +86,7 @@ void ConfigWidget::save()
     m_internalSettings->setActiveHighlight(m_ui.activeHighlight->currentIndex());
     m_internalSettings->setActiveHighlightCustomColor(m_ui.highlightCustomColor->color());
     m_internalSettings->setActiveHighlightBold(m_ui.highlightBold->isChecked());
+    m_internalSettings->setActiveHighlightRadius(m_ui.highlightRadius->value());
     m_internalSettings->setTitleAlignment(m_ui.titleAlignment->currentIndex());
     m_internalSettings->setShadowSize(m_ui.shadowSize->currentIndex());
     m_internalSettings->setShadowStrength(qRound(qreal(m_ui.shadowStrength->value() * 255) / 100));
@@ -122,6 +128,7 @@ void ConfigWidget::updateChanged()
     const bool modified = m_ui.activeHighlight->currentIndex() != m_internalSettings->activeHighlight()
         || m_ui.highlightCustomColor->color() != m_internalSettings->activeHighlightCustomColor()
         || m_ui.highlightBold->isChecked() != m_internalSettings->activeHighlightBold()
+        || m_ui.highlightRadius->value() != m_internalSettings->activeHighlightRadius()
         || m_ui.titleAlignment->currentIndex() != m_internalSettings->titleAlignment()
         || m_ui.shadowSize->currentIndex() != m_internalSettings->shadowSize()
         || qRound(qreal(m_ui.shadowStrength->value() * 255) / 100) != m_internalSettings->shadowStrength()

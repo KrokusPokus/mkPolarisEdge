@@ -73,10 +73,6 @@ inline const QColor Line_Purple(0x85, 0x00, 0xf7);
 inline const QColor Line_Red(0xff, 0x00, 0x00);
 inline const QColor Text_Active(255, 255, 255);     // ActiveTextColor
 inline const QColor Text_Inactive(128, 128, 128);   // InactiveTextColor
-static constexpr qreal Corner_OuterRadius = 3;              // frame line corners of the active window: outside ...
-static constexpr qreal Corner_OuterRadiusBold = 4;          // bold variant: line pieces scaled by 4/3 ...
-static constexpr qreal Corner_OuterRadiusBoldTop = 3 * 1.04; // ... the top corners vertically only by 1.04
-static constexpr qreal Corner_InnerRadius = 2;              // ... and inside
 }
 
 namespace Metrics

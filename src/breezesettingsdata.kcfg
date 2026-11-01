@@ -60,6 +60,16 @@
       <default>133, 0, 247</default>
     </entry>
 
+    <!-- radius of the highlight corners at pixel edge 0, the outer edge of the bold line (also when only the thin
+         line is drawn); every pixel edge further in has a radius 1 smaller, down to 0 (all corner arcs are
+         concentric). 4 is the look of the mkAurorae themes, 0 square corners. Up to 8 the corner stays inside the
+         4 px frame at the bottom, where the window content begins. -->
+    <entry name="ActiveHighlightRadius" type="Int">
+      <default>4</default>
+      <min>0</min>
+      <max>8</max>
+    </entry>
+
     <!-- 2 px highlight, corners included, as in the "B" variants -->
     <entry name="ActiveHighlightBold" type="Bool">
       <default>false</default>

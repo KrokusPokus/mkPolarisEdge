@@ -33,6 +33,7 @@
 #include <QPainterPath>
 #include <QTextStream>
 #include <QTimer>
+#include <QTransform>
 
 K_PLUGIN_FACTORY_WITH_JSON(MkPolarisEdgeDecoFactory, "mkpolarisedge.json", registerPlugin<MkPolarisEdge::Decoration>(); registerPlugin<MkPolarisEdge::Button>();)
 
@@ -110,55 +111,13 @@ inline CompositeShadowParams lookupShadowParams(int size)
     }
 }
 
-// mkPolarisEdge: helpers for painting the frame
+// mkPolarisEdge: vertical gradient for painting the frame
 QBrush verticalGradient(qreal y1, qreal y2, const QColor &c1, const QColor &c2)
 {
     QLinearGradient g(0, y1, 0, y2);
     g.setColorAt(0, c1);
     g.setColorAt(1, c2);
     return QBrush(g);
-}
-
-// rectangle whose corner (0 top left, 1 top right, 2 bottom left, 3 bottom right) is a quarter ellipse with the
-// radii rx, ry, as the corner paths of decoration.svg ("A 3,3 ..."); a radius may be as large as the rectangle
-// (QPainterPath::addRoundedRect would limit it to half the width)
-QPainterPath cornerPath(const QRectF &r, int corner, qreal rx, qreal ry)
-{
-    const qreal dx = 2 * rx;
-    const qreal dy = 2 * ry;
-    QPainterPath p;
-    switch (corner) {
-    case 0:
-        p.moveTo(r.left(), r.bottom());
-        p.lineTo(r.left(), r.top() + ry);
-        p.arcTo(QRectF(r.left(), r.top(), dx, dy), 180, -90);
-        p.lineTo(r.right(), r.top());
-        p.lineTo(r.right(), r.bottom());
-        break;
-    case 1:
-        p.moveTo(r.left(), r.top());
-        p.lineTo(r.right() - rx, r.top());
-        p.arcTo(QRectF(r.right() - dx, r.top(), dx, dy), 90, -90);
-        p.lineTo(r.right(), r.bottom());
-        p.lineTo(r.left(), r.bottom());
-        break;
-    case 2:
-        p.moveTo(r.left(), r.top());
-        p.lineTo(r.right(), r.top());
-        p.lineTo(r.right(), r.bottom());
-        p.lineTo(r.left() + rx, r.bottom());
-        p.arcTo(QRectF(r.left(), r.bottom() - dy, dx, dy), 270, -90);
-        break;
-    default:
-        p.moveTo(r.left(), r.top());
-        p.lineTo(r.right(), r.top());
-        p.lineTo(r.right(), r.bottom() - ry);
-        p.arcTo(QRectF(r.right() - dx, r.bottom() - dy, dx, dy), 0, -90);
-        p.lineTo(r.left(), r.bottom());
-        break;
-    }
-    p.closeSubpath();
-    return p;
 }
 }
 
@@ -541,34 +500,45 @@ void Decoration::paintFrame(QPainter *painter)
 void Decoration::paintHighlight(QPainter *painter)
 {
     // mkPolarisEdge: the highlight of the active window (the color variants of the mkAurorae themes), painted over
-    // the regular frame: a colored line in pixel 1 with rounded corners, outer radius 3, inner radius 2. The bold
-    // variant ("B" themes) scales the line pieces of decoration.svg to the outer edge: pixels 0 and 1, radius 4
-    // (top corners: 4 x 3.12, scaled by 1.04 vertically).
+    // the regular frame: a colored line in pixel 1, the bold variant ("B" themes) in pixels 0 and 1. Its corners are
+    // concentric arcs. The setting ActiveHighlightRadius is the radius at pixel edge 0, the outer edge of the bold
+    // line (also when only the thin line is drawn); every pixel edge further in has a radius 1 smaller, down to 0
+    // (default 4: bold outer 4, thin outer 3, inner 2, as in the mkAurorae themes; 0: square corners).
     const qreal W = size().width();
     const qreal H = size().height();
-    const qreal T = Metrics::TitleBar_TotalHeight;
+    const qreal R = m_internalSettings->activeHighlightRadius();
+    const qreal o = m_internalSettings->activeHighlightBold() ? 0 : 1;   // outer edge of the line
+    const qreal i = 2;                                                   // inner edge of the line
+    const qreal ro = qMax<qreal>(0, R - o);                              // radius of the outer edge
+    const qreal ri = qMax<qreal>(0, R - i);                              // radius of the inner edge
+    const qreal c = qMax(R, i);   // the corner pieces reach from the outer edge to here, the straight pieces start here
     const QColor line = highlightColor();
-    const bool bold = m_internalSettings->activeHighlightBold();
-    const qreal o = bold ? 0 : 1;   // outer edge of the line
-    const qreal w = 2 - o;          // width of the line
 
-    // straight pieces
-    painter->fillRect(QRectF(4, o, W - 8, w), line);           // top
-    painter->fillRect(QRectF(o, T, w, H - T - 4), line);       // left
-    painter->fillRect(QRectF(W - 2, T, w, H - T - 4), line);   // right
-    painter->fillRect(QRectF(4, H - 2, W - 8, w), line);       // bottom
+    // straight pieces: rectangles (much cheaper to rasterize than a path over the whole window height)
+    painter->fillRect(QRectF(c, o, W - 2 * c, i - o), line);       // top
+    painter->fillRect(QRectF(c, H - i, W - 2 * c, i - o), line);   // bottom
+    painter->fillRect(QRectF(o, c, i - o, H - 2 * c), line);       // left
+    painter->fillRect(QRectF(W - i, c, i - o, H - 2 * c), line);   // right
 
-    // corner pieces: the area between the outer and the inner arc
-    const qreal rx = bold ? Theme::Corner_OuterRadiusBold : Theme::Corner_OuterRadius;
-    const qreal ryTop = bold ? Theme::Corner_OuterRadiusBoldTop : Theme::Corner_OuterRadius;
-    const qreal ri = Theme::Corner_InnerRadius;
-    auto corner = [&](const QRectF &outer, const QRectF &inner, int c, qreal ry) {
-        painter->fillPath(cornerPath(outer, c, rx, ry).subtracted(cornerPath(inner, c, ri, ri)), line);
-    };
-    corner(QRectF(o, o, 4 - o, T - o), QRectF(2, 2, 2, T - 2), 0, ryTop);
-    corner(QRectF(W - 4, o, 4 - o, T - o), QRectF(W - 4, 2, 2, T - 2), 1, ryTop);
-    corner(QRectF(o, H - 4, 4 - o, 4 - o), QRectF(2, H - 4, 2, 2), 2, rx);
-    corner(QRectF(W - 4, H - 4, 4 - o, 4 - o), QRectF(W - 4, H - 4, 2, 2), 3, rx);
+    // corner piece top left, between the outer and the inner arc; mirrored for the other corners
+    QPainterPath corner;
+    corner.moveTo(o, c);
+    corner.lineTo(o, o + ro);
+    if (ro > 0) {
+        corner.arcTo(QRectF(o, o, 2 * ro, 2 * ro), 180, -90);
+    }
+    corner.lineTo(c, o);
+    corner.lineTo(c, i);
+    corner.lineTo(i + ri, i);
+    if (ri > 0) {
+        corner.arcTo(QRectF(i, i, 2 * ri, 2 * ri), 90, 90);
+    }
+    corner.lineTo(i, c);
+    corner.closeSubpath();
+    painter->fillPath(corner, line);
+    painter->fillPath(QTransform(-1, 0, 0, 1, W, 0).map(corner), line);    // top right
+    painter->fillPath(QTransform(1, 0, 0, -1, 0, H).map(corner), line);    // bottom left
+    painter->fillPath(QTransform(-1, 0, 0, -1, W, H).map(corner), line);   // bottom right
 }
 
 QColor Decoration::highlightColor() const

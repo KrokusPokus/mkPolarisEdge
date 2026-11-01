@@ -17,6 +17,7 @@ for resizing matches the visible frame exactly.
   - the system accent colour
   - purple, red, or any custom colour
 - **Bold highlight**: a 2 px line, as in the "B" variants of the mkAurorae themes
+- **Corner radius** of the highlight, 0 (square) to 8 px; 4 matches the mkAurorae themes
 - Title alignment: left, centre, centre (full width), right
 - Optional shadow with adjustable size, strength and colour (off by default, like the originals)
 - Settings dialog with English and German translations
