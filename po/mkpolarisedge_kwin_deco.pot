@@ -2,7 +2,7 @@
 msgid ""
 msgstr ""
 "Project-Id-Version: mkpolarisedge\n"
-"POT-Creation-Date: 2026-11-01 13:39\n"
+"POT-Creation-Date: 2026-11-01 17:36\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
@@ -45,11 +45,15 @@ msgid "Custom color"
 msgstr ""
 
 #: src/config/ui/breezeconfigurationui.ui
-msgid "Bold highlight"
+msgid "Highlight width:"
 msgstr ""
 
 #: src/config/ui/breezeconfigurationui.ui
-msgid "2 px highlight line, as in the B variants of the mkAurorae themes"
+msgid "Width of the highlight line: 1 thin, 2 bold as in the B variants of the mkAurorae themes, 3 and 4 grow one row further in each (4 covers the whole frame)"
+msgstr ""
+
+#: src/config/ui/breezeconfigurationui.ui
+msgid " px"
 msgstr ""
 
 #: src/config/ui/breezeconfigurationui.ui
@@ -57,11 +61,7 @@ msgid "Corner radius:"
 msgstr ""
 
 #: src/config/ui/breezeconfigurationui.ui
-msgid "Radius of the rounded corners of the highlight, at the outer edge of the bold line (the thin line: 1 px less; 0: square corners)"
-msgstr ""
-
-#: src/config/ui/breezeconfigurationui.ui
-msgid " px"
+msgid "Radius of the rounded corners of the highlight, at the outer edge of the frame (the thin line starts 1 px further in: 1 px less; 0: square corners)"
 msgstr ""
 
 #: src/config/ui/breezeconfigurationui.ui

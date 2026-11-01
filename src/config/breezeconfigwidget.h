@@ -48,8 +48,12 @@ protected Q_SLOTS:
     virtual void updateChanged();
 
 private:
-    //* show the custom color button only for the custom highlight color, bold only with a highlight
-    void updateCustomColorVisibility();
+    //* show the custom color button only for the custom highlight color; "None" is the master switch of the highlight:
+    // it disables width and radius, the width shows 0 then (the real width is kept in m_highlightWidth)
+    void updateHighlightControls();
+
+    //* the highlight width to save: the spin box value, or the kept one while it shows the 0 of "None"
+    int highlightWidth() const;
 
     //* assigns the settings to the ui
     void setUi(const InternalSettings &settings);
@@ -66,6 +70,9 @@ private:
 
     //* changed state
     bool m_changed;
+
+    //* highlight width while the spin box shows 0 for "None"
+    int m_highlightWidth = 1;
 };
 
 }

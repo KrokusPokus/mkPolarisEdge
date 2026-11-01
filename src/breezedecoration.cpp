@@ -500,15 +500,17 @@ void Decoration::paintFrame(QPainter *painter)
 void Decoration::paintHighlight(QPainter *painter)
 {
     // mkPolarisEdge: the highlight of the active window (the color variants of the mkAurorae themes), painted over
-    // the regular frame: a colored line in pixel 1, the bold variant ("B" themes) in pixels 0 and 1. Its corners are
-    // concentric arcs. The setting ActiveHighlightRadius is the radius at pixel edge 0, the outer edge of the bold
-    // line (also when only the thin line is drawn); every pixel edge further in has a radius 1 smaller, down to 0
+    // the regular frame: a colored line of ActiveHighlightWidth pixel rows of the 4 px frame. Width 1 is the thin line
+    // in pixel 1, 2 the bold line ("B" themes) in pixels 0 and 1, 3 and 4 grow one row further in each. Its corners
+    // are concentric arcs. The setting ActiveHighlightRadius is the radius at pixel edge 0, the outer edge of the
+    // frame (also when the line starts at pixel 1); every pixel edge further in has a radius 1 smaller, down to 0
     // (default 4: bold outer 4, thin outer 3, inner 2, as in the mkAurorae themes; 0: square corners).
     const qreal W = size().width();
     const qreal H = size().height();
     const qreal R = m_internalSettings->activeHighlightRadius();
-    const qreal o = m_internalSettings->activeHighlightBold() ? 0 : 1;   // outer edge of the line
-    const qreal i = 2;                                                   // inner edge of the line
+    const int width = m_internalSettings->activeHighlightWidth();
+    const qreal o = width == 1 ? 1 : 0;       // outer edge of the line
+    const qreal i = width == 1 ? 2 : width;   // inner edge of the line
     const qreal ro = qMax<qreal>(0, R - o);                              // radius of the outer edge
     const qreal ri = qMax<qreal>(0, R - i);                              // radius of the inner edge
     const qreal c = qMax(R, i);   // the corner pieces reach from the outer edge to here, the straight pieces start here

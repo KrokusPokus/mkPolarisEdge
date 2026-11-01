@@ -58,13 +58,29 @@
          </item>
         </layout>
        </item>
-       <item row="1" column="1">
-        <widget class="QCheckBox" name="highlightBold">
+       <item row="1" column="0">
+        <widget class="QLabel" name="highlightWidthLabel">
          <property name="text">
-          <string>Bold highlight</string>
+          <string>Highlight width:</string>
          </property>
+         <property name="buddy">
+          <cstring>highlightWidth</cstring>
+         </property>
+        </widget>
+       </item>
+       <item row="1" column="1">
+        <widget class="QSpinBox" name="highlightWidth">
          <property name="toolTip">
-          <string>2 px highlight line, as in the B variants of the mkAurorae themes</string>
+          <string>Width of the highlight line: 1 thin, 2 bold as in the B variants of the mkAurorae themes, 3 and 4 grow one row further in each (4 covers the whole frame)</string>
+         </property>
+         <property name="suffix">
+          <string> px</string>
+         </property>
+         <property name="minimum">
+          <number>1</number>
+         </property>
+         <property name="maximum">
+          <number>4</number>
          </property>
         </widget>
        </item>
@@ -81,7 +97,7 @@
        <item row="2" column="1">
         <widget class="QSpinBox" name="highlightRadius">
          <property name="toolTip">
-          <string>Radius of the rounded corners of the highlight, at the outer edge of the bold line (the thin line: 1 px less; 0: square corners)</string>
+          <string>Radius of the rounded corners of the highlight, at the outer edge of the frame (the thin line starts 1 px further in: 1 px less; 0: square corners)</string>
          </property>
          <property name="suffix">
           <string> px</string>

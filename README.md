@@ -16,7 +16,7 @@ for resizing matches the visible frame exactly.
   - none (active and inactive windows look the same, like the grey mkAurorae theme)
   - the system accent colour
   - purple, red, or any custom colour
-- **Bold highlight**: a 2 px line, as in the "B" variants of the mkAurorae themes
+- **Highlight width** from 1 to 4 px: 1 the thin line, 2 as in the "B" variants of the mkAurorae themes, 4 covers the whole frame
 - **Corner radius** of the highlight, 0 (square) to 8 px; 4 matches the mkAurorae themes
 - Title alignment: left, centre, centre (full width), right
 - Optional shadow with adjustable size, strength and colour (off by default, like the originals)

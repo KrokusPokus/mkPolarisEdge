@@ -43,7 +43,7 @@ void SettingsProvider::reconfigure()
         m_defaultSettings->setCurrentGroup(QStringLiteral("Windeco"));
     }
 
-    m_defaultSettings->load();
+    loadSettings(*m_defaultSettings);
 }
 
 //__________________________________________________________________

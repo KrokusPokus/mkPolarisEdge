@@ -60,19 +60,23 @@
       <default>133, 0, 247</default>
     </entry>
 
-    <!-- radius of the highlight corners at pixel edge 0, the outer edge of the bold line (also when only the thin
-         line is drawn); every pixel edge further in has a radius 1 smaller, down to 0 (all corner arcs are
+    <!-- width of the highlight line, in pixel rows of the 4 px frame: 1 the thin line in pixel 1, 2 the bold line in
+         pixels 0 and 1 (the "B" variants), 3 and 4 grow one row further in each (4 covers the whole frame).
+         Switched off by ActiveHighlight HighlightNone. Replaces ActiveHighlightBold of version 1.0 (true: 2), see loadSettings() in breeze.h. -->
+    <entry name="ActiveHighlightWidth" type="Int">
+      <default>1</default>
+      <min>1</min>
+      <max>4</max>
+    </entry>
+
+    <!-- radius of the highlight corners at pixel edge 0, the outer edge of the frame (also when the highlight starts
+         further in, as the thin line in pixel 1); every pixel edge further in has a radius 1 smaller, down to 0 (all corner arcs are
          concentric). 4 is the look of the mkAurorae themes, 0 square corners. Up to 8 the corner stays inside the
          4 px frame at the bottom, where the window content begins. -->
     <entry name="ActiveHighlightRadius" type="Int">
       <default>4</default>
       <min>0</min>
       <max>8</max>
-    </entry>
-
-    <!-- 2 px highlight, corners included, as in the "B" variants -->
-    <entry name="ActiveHighlightBold" type="Bool">
-      <default>false</default>
     </entry>
 
   </group>

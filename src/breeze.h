@@ -8,6 +8,8 @@
 
 #include "breezesettings.h"
 
+#include <KConfigGroup>
+
 #include <QColor>
 #include <QList>
 #include <QSharedPointer>
@@ -18,6 +20,17 @@ namespace MkPolarisEdge
 using InternalSettingsPtr = QSharedPointer<InternalSettings>;
 using InternalSettingsList = QList<InternalSettingsPtr>;
 using InternalSettingsListIterator = QListIterator<InternalSettingsPtr>;
+
+//* mkPolarisEdge: loads the settings; ActiveHighlightBold of version 1.0 becomes ActiveHighlightWidth 2 as long as no
+// width has been saved (the settings dialog removes the old key when saving)
+inline void loadSettings(InternalSettings &settings)
+{
+    settings.load();
+    const KConfigGroup group(settings.config(), QStringLiteral("Windeco"));
+    if (!group.hasKey("ActiveHighlightWidth") && group.readEntry("ActiveHighlightBold", false)) {
+        settings.setActiveHighlightWidth(2);
+    }
+}
 
 //* metrics
 namespace Metrics

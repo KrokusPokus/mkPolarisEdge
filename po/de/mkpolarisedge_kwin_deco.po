@@ -2,7 +2,7 @@
 msgid ""
 msgstr ""
 "Project-Id-Version: mkpolarisedge\n"
-"POT-Creation-Date: 2026-11-01 13:39\n"
+"POT-Creation-Date: 2026-11-01 17:36\n"
 "PO-Revision-Date: 2026-11-01 12:00+0100\n"
 "Last-Translator: KrokusPokus\n"
 "Language-Team: German\n"
@@ -56,13 +56,22 @@ msgid "Custom color"
 msgstr "Eigene Farbe"
 
 #: src/config/ui/breezeconfigurationui.ui
-msgid "Bold highlight"
-msgstr "Breite Hervorhebung"
+msgid "Highlight width:"
+msgstr "Breite der Hervorhebung:"
 
 #: src/config/ui/breezeconfigurationui.ui
-msgid "2 px highlight line, as in the B variants of the mkAurorae themes"
+msgid ""
+"Width of the highlight line: 1 thin, 2 bold as in the B variants of the "
+"mkAurorae themes, 3 and 4 grow one row further in each (4 covers the whole "
+"frame)"
 msgstr ""
-"Hervorhebungslinie 2 px breit, wie bei den B-Varianten der mkAurorae-Designs"
+"Breite der Hervorhebungslinie: 1 schmal, 2 breit wie bei den B-Varianten der "
+"mkAurorae-Designs, 3 und 4 wachsen je eine Zeile weiter nach innen (4 "
+"überdeckt den ganzen Rahmen)"
+
+#: src/config/ui/breezeconfigurationui.ui
+msgid " px"
+msgstr " px"
 
 #: src/config/ui/breezeconfigurationui.ui
 msgid "Corner radius:"
@@ -71,14 +80,10 @@ msgstr "Eckradius:"
 #: src/config/ui/breezeconfigurationui.ui
 msgid ""
 "Radius of the rounded corners of the highlight, at the outer edge of the "
-"bold line (the thin line: 1 px less; 0: square corners)"
+"frame (the thin line starts 1 px further in: 1 px less; 0: square corners)"
 msgstr ""
-"Radius der abgerundeten Ecken der Hervorhebung, an der Außenkante der "
-"breiten Linie (die schmale Linie: 1 px weniger; 0: eckig)"
-
-#: src/config/ui/breezeconfigurationui.ui
-msgid " px"
-msgstr " px"
+"Radius der abgerundeten Ecken der Hervorhebung, an der Außenkante des "
+"Rahmens (die schmale Linie beginnt 1 px weiter innen: 1 px weniger; 0: eckig)"
 
 #: src/config/ui/breezeconfigurationui.ui
 msgid "Title alignment:"
