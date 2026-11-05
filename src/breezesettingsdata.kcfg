@@ -79,6 +79,12 @@
       <max>8</max>
     </entry>
 
+    <!-- blend the rounded corners of the highlight in linear light. QPainter blends gamma-encoded values, which makes
+         the mixed pixels of a light line over the dark frame too dark, but matches the mkAurorae themes more closely. -->
+    <entry name="HighQualityRendering" type="Bool">
+      <default>true</default>
+    </entry>
+
   </group>
 
 </kcfg>

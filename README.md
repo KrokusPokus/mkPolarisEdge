@@ -18,6 +18,7 @@ for resizing matches the visible frame exactly.
   - purple, red, or any custom colour
 - **Highlight width** from 1 to 4 px: 1 the thin line, 2 as in the "B" variants of the mkAurorae themes, 4 covers the whole frame
 - **Corner radius** of the highlight, 0 (square) to 8 px; 4 matches the mkAurorae themes
+- **High Quality Rendering** (on by default): blends the rounded corners of the highlight in linear light, so that their edge pixels are not too dark; off, they are drawn as in the mkAurorae themes
 - Title alignment: left, centre, centre (full width), right
 - Optional shadow with adjustable size, strength and colour (off by default, like the originals)
 - Settings dialog with English and German translations

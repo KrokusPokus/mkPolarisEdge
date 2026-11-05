@@ -2,7 +2,7 @@
 msgid ""
 msgstr ""
 "Project-Id-Version: mkpolarisedge\n"
-"POT-Creation-Date: 2026-11-01 17:36\n"
+"POT-Creation-Date: 2026-11-05 11:59\n"
 "PO-Revision-Date: 2026-11-01 12:00+0100\n"
 "Last-Translator: KrokusPokus\n"
 "Language-Team: German\n"
@@ -108,6 +108,20 @@ msgstr "Mittig (ganze Breite)"
 msgctxt "@item:inlistbox alignment"
 msgid "Right"
 msgstr "Rechts"
+
+#: src/config/ui/breezeconfigurationui.ui
+msgid ""
+"Blends the rounded corners of the highlight in linear light, so that their "
+"edge pixels are not too dark. Switched off, they are drawn as in the "
+"mkAurorae themes."
+msgstr ""
+"Mischt die abgerundeten Ecken der Hervorhebung im linearen Licht, damit ihre "
+"Randpixel nicht zu dunkel werden. Ausgeschaltet werden sie wie in den "
+"mkAurorae-Designs gezeichnet."
+
+#: src/config/ui/breezeconfigurationui.ui
+msgid "High Quality Rendering"
+msgstr "Hochwertiges Rendering"
 
 #: src/config/ui/breezeconfigurationui.ui
 msgid "Shadows"

@@ -619,19 +619,16 @@ void Decoration::paintLine(QPainter *painter, const QColor &line, int width, qre
     corner.lineTo(i, c);
     corner.closeSubpath();
 
-    // first the corners: on a fractional scale the pieces share pixels, and an image replaces what lies below it
-    if ((ro > 0 || ri > 0) && painter->deviceTransform().type() <= QTransform::TxScale) {
-        // arcs: blended in linear light
+    // setting HighQualityRendering: arcs blended in linear light. Square corners have no mixed pixels (on an integer
+    // scale), so they stay with QPainter, as everything does with the setting switched off.
+    const bool linearCorners = m_internalSettings->highQualityRendering() && (ro > 0 || ri > 0) && painter->deviceTransform().type() <= QTransform::TxScale;
+
+    // the images come first: on a fractional scale the pieces share pixels, and an image replaces what lies below it
+    if (linearCorners) {
         paintCornerTile(painter, corner, line, width, R, c, false, false);
         paintCornerTile(painter, corner, line, width, R, c, true, false);
         paintCornerTile(painter, corner, line, width, R, c, false, true);
         paintCornerTile(painter, corner, line, width, R, c, true, true);
-    } else {
-        // square corners have no mixed pixels (on an integer scale)
-        painter->fillPath(corner, line);
-        painter->fillPath(QTransform(-1, 0, 0, 1, W, 0).map(corner), line);    // top right
-        painter->fillPath(QTransform(1, 0, 0, -1, 0, H).map(corner), line);    // bottom left
-        painter->fillPath(QTransform(-1, 0, 0, -1, W, H).map(corner), line);   // bottom right
     }
 
     // straight pieces: rectangles (much cheaper to rasterize than a path over the whole window height)
@@ -639,6 +636,13 @@ void Decoration::paintLine(QPainter *painter, const QColor &line, int width, qre
     painter->fillRect(QRectF(c, H - i, W - 2 * c, i - o), line);   // bottom
     painter->fillRect(QRectF(o, c, i - o, H - 2 * c), line);       // left
     painter->fillRect(QRectF(W - i, c, i - o, H - 2 * c), line);   // right
+
+    if (!linearCorners) {
+        painter->fillPath(corner, line);
+        painter->fillPath(QTransform(-1, 0, 0, 1, W, 0).map(corner), line);    // top right
+        painter->fillPath(QTransform(1, 0, 0, -1, 0, H).map(corner), line);    // bottom left
+        painter->fillPath(QTransform(-1, 0, 0, -1, W, H).map(corner), line);   // bottom right
+    }
 }
 
 void Decoration::paintCornerTile(QPainter *painter, const QPainterPath &corner, const QColor &line, int width, qreal R, qreal c, bool mirrorX, bool mirrorY)
