@@ -101,8 +101,9 @@ private:
 
     void createButtons();
     //* mkPolarisEdge: the frame background, and over it one line: gray, or the highlight of the active window
-    void paintFrame(QPainter *painter);
+    static void paintFrame(QPainter *painter, qreal W, qreal H, bool active);
     void paintLine(QPainter *painter, const QColor &line, int width, qreal R);
+    void paintCornerTile(QPainter *painter, const QPainterPath &corner, const QColor &line, int width, qreal R, qreal c, bool mirrorX, bool mirrorY);
     void paintTitleBar(QPainter *painter, const QRectF &repaintRegion);
     void updateShadow();
     std::shared_ptr<KDecoration3::DecorationShadow> createShadowObject(const float strengthScale);

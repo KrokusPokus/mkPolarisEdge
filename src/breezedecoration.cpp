@@ -29,11 +29,16 @@
 #include <QDBusMessage>
 #include <QDBusPendingCallWatcher>
 #include <QDBusPendingReply>
+#include <QHash>
+#include <QImage>
 #include <QPainter>
 #include <QPainterPath>
 #include <QTextStream>
 #include <QTimer>
 #include <QTransform>
+
+#include <array>
+#include <cmath>
 
 K_PLUGIN_FACTORY_WITH_JSON(MkPolarisEdgeDecoFactory, "mkpolarisedge.json", registerPlugin<MkPolarisEdge::Decoration>(); registerPlugin<MkPolarisEdge::Button>();)
 
@@ -119,6 +124,97 @@ QBrush verticalGradient(qreal y1, qreal y2, const QColor &c1, const QColor &c2)
     g.setColorAt(1, c2);
     return QBrush(g);
 }
+
+// mkPolarisEdge: QPainter blends the gamma-encoded values, which makes mixed pixels of a light line over a dark
+// background too dark. The arcs of the line are therefore blended in linear light (see paintLine()) into small
+// images, one per corner, which only have to be made once per key.
+struct CornerKey {
+    QRgb line;
+    int R;
+    int width;
+    int active;
+    int mirrorX;
+    int mirrorY;
+    // all of them in 1/256: the scale, the fractional part of the corner in device pixels, the window size up to
+    // where it can still reach into the corner
+    int scaleX;
+    int scaleY;
+    int offsetX;
+    int offsetY;
+    int W;
+    int H;
+
+    bool operator==(const CornerKey &) const = default;
+};
+
+size_t qHash(const CornerKey &k, size_t seed = 0)
+{
+    return qHashMulti(seed, k.line, k.R, k.width, k.active, k.mirrorX, k.mirrorY, k.scaleX, k.scaleY, k.offsetX, k.offsetY, k.W, k.H);
+}
+
+struct CornerTile {
+    QImage image;
+    QPoint offset; // of the image, relative to the device pixel the corner of the window lies in
+};
+
+constexpr int s_cornerTileLimit = 64; // far above any real use; only guards against unlimited growth
+static QHash<CornerKey, CornerTile> g_sCornerTiles;
+
+float srgbToLinear(float c)
+{
+    return c <= 0.04045f ? c / 12.92f : std::pow((c + 0.055f) / 1.055f, 2.4f);
+}
+
+float linearToSrgb(float c)
+{
+    return c <= 0.0031308f ? c * 12.92f : 1.055f * std::pow(c, 1.0f / 2.4f) - 0.055f;
+}
+
+const std::array<float, 256> &srgbToLinearTable()
+{
+    static const std::array<float, 256> table = [] {
+        std::array<float, 256> t;
+        for (int i = 0; i < 256; ++i) {
+            t[i] = srgbToLinear(i / 255.0f);
+        }
+        return t;
+    }();
+    return table;
+}
+
+// mixes line over background with the coverage of mask, in linear light. All pixels with coverage 0 or 255 stay
+// exact, because the conversion of 8 bit values there and back is free of loss.
+void blendLinear(QImage &background, const QImage &mask, const QColor &line)
+{
+    const auto &toLinear = srgbToLinearTable();
+    const QRgb lineRgb = line.rgb();
+    const float lineR = toLinear[qRed(lineRgb)];
+    const float lineG = toLinear[qGreen(lineRgb)];
+    const float lineB = toLinear[qBlue(lineRgb)];
+    const float lineA = line.alphaF();
+
+    for (int y = 0; y < background.height(); ++y) {
+        auto *dst = reinterpret_cast<QRgb *>(background.scanLine(y));
+        const uchar *cov = mask.constScanLine(y);
+        for (int x = 0; x < background.width(); ++x) {
+            if (cov[x] == 0) {
+                continue;
+            }
+            const QRgb bg = qUnpremultiply(dst[x]);
+            const float a = cov[x] / 255.0f * lineA;
+            const float bgA = qAlpha(bg) / 255.0f * (1.0f - a);
+            const float outA = a + bgA;
+            if (outA <= 0.0f) {
+                continue;
+            }
+            const auto mix = [&](float l, int b) {
+                const float c = (a * l + bgA * toLinear[b]) / outA;
+                return qBound(0, qRound(linearToSrgb(c) * 255.0f), 255);
+            };
+            dst[x] = qPremultiply(qRgba(mix(lineR, qRed(bg)), mix(lineG, qGreen(bg)), mix(lineB, qBlue(bg)), qRound(outA * 255.0f)));
+        }
+    }
+}
 }
 
 namespace MkPolarisEdge
@@ -150,6 +246,7 @@ Decoration::~Decoration()
     if (g_sDecoCount == 0) {
         // last deco destroyed, clean up shadow
         g_sShadow.reset();
+        g_sCornerTiles.clear();
     }
 }
 
@@ -424,7 +521,7 @@ void Decoration::paint(QPainter *painter, const QRectF &repaintRegion)
         // maximized: the title area is plain (measured on the Aurorae rendering of decoration-maximized-center)
         painter->fillRect(QRectF(0, 0, size().width(), borderTop()), Theme::Title_Maximized);
     } else {
-        paintFrame(painter);
+        paintFrame(painter, size().width(), size().height(), window()->isActive());
         if (window()->isActive() && m_internalSettings->activeHighlight() != InternalSettings::HighlightNone) {
             paintLine(painter, highlightColor(), m_internalSettings->activeHighlightWidth(), m_internalSettings->activeHighlightRadius());
         } else {
@@ -438,15 +535,12 @@ void Decoration::paint(QPainter *painter, const QRectF &repaintRegion)
     paintTitleBar(painter, repaintRegion);
 }
 
-void Decoration::paintFrame(QPainter *painter)
+void Decoration::paintFrame(QPainter *painter, qreal W, qreal H, bool active)
 {
     // mkPolarisEdge: the frame background without the line: rim in pixel 0, pixel 1 (where the line goes) as rim
     // too, pixels 2 and 3 inside, title gradient and separators. Square everywhere; the line and its corners are
     // painted over it by paintLine(). Pixel boundaries are integers (logical pixels). Only the title area differs
     // between active and inactive windows.
-    const bool active = window()->isActive();
-    const qreal W = size().width();
-    const qreal H = size().height();
     const qreal T = Metrics::TitleBar_TotalHeight;   // 26: separators in rows T - 2 and T - 1
 
     auto fill = [painter](qreal x, qreal y, qreal w, qreal h, const QBrush &brush) {
@@ -509,12 +603,6 @@ void Decoration::paintLine(QPainter *painter, const QColor &line, int width, qre
     const qreal ri = qMax<qreal>(0, R - i);                              // radius of the inner edge
     const qreal c = qMax(R, i);   // the corner pieces reach from the outer edge to here, the straight pieces start here
 
-    // straight pieces: rectangles (much cheaper to rasterize than a path over the whole window height)
-    painter->fillRect(QRectF(c, o, W - 2 * c, i - o), line);       // top
-    painter->fillRect(QRectF(c, H - i, W - 2 * c, i - o), line);   // bottom
-    painter->fillRect(QRectF(o, c, i - o, H - 2 * c), line);       // left
-    painter->fillRect(QRectF(W - i, c, i - o, H - 2 * c), line);   // right
-
     // corner piece top left, between the outer and the inner arc; mirrored for the other corners
     QPainterPath corner;
     corner.moveTo(o, c);
@@ -530,10 +618,108 @@ void Decoration::paintLine(QPainter *painter, const QColor &line, int width, qre
     }
     corner.lineTo(i, c);
     corner.closeSubpath();
-    painter->fillPath(corner, line);
-    painter->fillPath(QTransform(-1, 0, 0, 1, W, 0).map(corner), line);    // top right
-    painter->fillPath(QTransform(1, 0, 0, -1, 0, H).map(corner), line);    // bottom left
-    painter->fillPath(QTransform(-1, 0, 0, -1, W, H).map(corner), line);   // bottom right
+
+    // first the corners: on a fractional scale the pieces share pixels, and an image replaces what lies below it
+    if ((ro > 0 || ri > 0) && painter->deviceTransform().type() <= QTransform::TxScale) {
+        // arcs: blended in linear light
+        paintCornerTile(painter, corner, line, width, R, c, false, false);
+        paintCornerTile(painter, corner, line, width, R, c, true, false);
+        paintCornerTile(painter, corner, line, width, R, c, false, true);
+        paintCornerTile(painter, corner, line, width, R, c, true, true);
+    } else {
+        // square corners have no mixed pixels (on an integer scale)
+        painter->fillPath(corner, line);
+        painter->fillPath(QTransform(-1, 0, 0, 1, W, 0).map(corner), line);    // top right
+        painter->fillPath(QTransform(1, 0, 0, -1, 0, H).map(corner), line);    // bottom left
+        painter->fillPath(QTransform(-1, 0, 0, -1, W, H).map(corner), line);   // bottom right
+    }
+
+    // straight pieces: rectangles (much cheaper to rasterize than a path over the whole window height)
+    painter->fillRect(QRectF(c, o, W - 2 * c, i - o), line);       // top
+    painter->fillRect(QRectF(c, H - i, W - 2 * c, i - o), line);   // bottom
+    painter->fillRect(QRectF(o, c, i - o, H - 2 * c), line);       // left
+    painter->fillRect(QRectF(W - i, c, i - o, H - 2 * c), line);   // right
+}
+
+void Decoration::paintCornerTile(QPainter *painter, const QPainterPath &corner, const QColor &line, int width, qreal R, qreal c, bool mirrorX, bool mirrorY)
+{
+    // mkPolarisEdge: one corner of the line in linear light: the frame background and the coverage of the corner
+    // piece are rasterized by QPainter as usual, only their mix is computed here. Painted in device pixels, so the
+    // image lands 1:1 on the pixels it was made for. The window size only matters for very small windows, so it is
+    // limited to keep the number of images down.
+    const qreal T = Metrics::TitleBar_TotalHeight;
+    const qreal limitW = 2 * c + 16;
+    const qreal limitH = T + c + 8;
+    const qreal W = qMin(size().width(), limitW);
+    const qreal H = qMin(size().height(), limitH);
+
+    const QTransform device = painter->deviceTransform();
+    const qreal sx = device.m11();
+    const qreal sy = device.m22();
+    const QPointF anchor = device.map(QPointF(mirrorX ? size().width() : 0, mirrorY ? size().height() : 0));
+    const QPoint anchorPixel(qFloor(anchor.x()), qFloor(anchor.y()));
+    const qreal ox = anchor.x() - anchorPixel.x();
+    const qreal oy = anchor.y() - anchorPixel.y();
+
+    const CornerKey key{line.rgba(),
+                        qRound(R),
+                        width,
+                        window()->isActive(),
+                        mirrorX,
+                        mirrorY,
+                        qRound(sx * 256),
+                        qRound(sy * 256),
+                        qRound(ox * 256),
+                        qRound(oy * 256),
+                        qRound(W * 256),
+                        qRound(H * 256)};
+
+    auto it = g_sCornerTiles.constFind(key);
+    if (it == g_sCornerTiles.constEnd()) {
+        // the part of the device pixels the corner reaches, relative to anchorPixel
+        const QPointF far(ox + (mirrorX ? -c * sx : c * sx), oy + (mirrorY ? -c * sy : c * sy));
+        const QPoint topLeft(qFloor(qMin(ox, far.x())), qFloor(qMin(oy, far.y())));
+        const QPoint bottomRight(qCeil(qMax(ox, far.x())), qCeil(qMax(oy, far.y())));
+        const QSize tileSize(bottomRight.x() - topLeft.x(), bottomRight.y() - topLeft.y());
+
+        // from logical coordinates of a window of size W x H to pixels of the image
+        const QTransform toTile(sx, 0, 0, sy, ox - topLeft.x() - (mirrorX ? W * sx : 0), oy - topLeft.y() - (mirrorY ? H * sy : 0));
+
+        QImage image(tileSize, QImage::Format_ARGB32_Premultiplied);
+        image.fill(Qt::transparent);
+        {
+            QPainter p(&image);
+            p.setPen(Qt::NoPen);
+            p.setRenderHint(QPainter::Antialiasing, true);
+            p.setTransform(toTile);
+            paintFrame(&p, W, H, window()->isActive());
+        }
+
+        QImage mask(tileSize, QImage::Format_Alpha8);
+        mask.fill(0);
+        {
+            QPainter p(&mask);
+            p.setPen(Qt::NoPen);
+            p.setRenderHint(QPainter::Antialiasing, true);
+            p.setTransform(toTile);
+            p.fillPath(QTransform(mirrorX ? -1 : 1, 0, 0, mirrorY ? -1 : 1, mirrorX ? W : 0, mirrorY ? H : 0).map(corner), Qt::black);
+        }
+
+        blendLinear(image, mask, line);
+
+        if (g_sCornerTiles.size() >= s_cornerTileLimit) {
+            g_sCornerTiles.clear();
+        }
+        it = g_sCornerTiles.insert(key, CornerTile{image, topLeft});
+    }
+
+    // in device pixels: neither the window of the painter nor the device pixel ratio apply
+    const qreal dpr = painter->device()->devicePixelRatioF();
+    painter->save();
+    painter->setViewTransformEnabled(false);
+    painter->setWorldTransform(QTransform::fromScale(1 / dpr, 1 / dpr));
+    painter->drawImage(anchorPixel + it->offset, it->image);
+    painter->restore();
 }
 
 QColor Decoration::highlightColor() const
