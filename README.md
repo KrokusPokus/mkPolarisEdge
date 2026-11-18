@@ -43,13 +43,13 @@ Other distributions need the matching `-devel` packages.
 ```bash
 git clone https://github.com/KrokusPokus/mkPolarisEdge.git
 cd mkPolarisEdge
-./build.sh       # builds into build-system/ (prefix /usr)
-./install.sh     # installs system-wide via sudo
+./build.sh                          # builds into build-system/ (prefix /usr)
+sudo cmake --install build-system   # installs system-wide
 ```
 
 `./build.sh --clean` starts again with an empty build directory.
 
-Without the scripts, the manual steps are:
+Without the script, the manual steps are:
 
 ```bash
 cmake -S . -B build -DCMAKE_BUILD_TYPE=Release -DCMAKE_INSTALL_PREFIX=/usr -DBUILD_TESTING=OFF

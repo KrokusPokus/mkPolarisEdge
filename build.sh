@@ -23,4 +23,4 @@ cmake -S "$SRC_DIR" -B "$BUILD_DIR" \
 cmake --build "$BUILD_DIR" --parallel "$(nproc)"
 
 echo
-echo "Build finished. Install with: ./install.sh"
+echo "Build finished. Install with: sudo cmake --install $BUILD_DIR"
