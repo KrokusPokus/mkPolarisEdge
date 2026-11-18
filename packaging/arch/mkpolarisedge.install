@@ -1,0 +1,8 @@
+_hint() {
+  echo ":: KWin laedt Dekorations-Plugins nur beim Start:"
+  echo "   Wayland: ab- und wieder anmelden, X11: kwin_x11 --replace &"
+  echo "   Auswahl unter Systemeinstellungen > Farben & Designs > Fensterdekorationen."
+}
+
+post_install() { _hint; }
+post_upgrade() { _hint; }

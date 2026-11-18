@@ -1,2 +1,7 @@
 build/
 build-system/
+
+# makepkg-Arbeitsdateien (nur PKGBUILD und .install gehoeren ins Repository)
+packaging/arch/*
+!packaging/arch/PKGBUILD
+!packaging/arch/*.install
