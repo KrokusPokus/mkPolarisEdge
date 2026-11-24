@@ -19,6 +19,9 @@ include(KDECMakeSettings)
 include(KDECompilerSettings NO_POLICY_SCOPE)
 include(FeatureSummary)
 
+# NDEBUG for every build type except Debug, including None (package builds)
+add_compile_definitions($<$<NOT:$<CONFIG:Debug>>:NDEBUG>)
+
 find_package(Qt6 ${QT_MIN_VERSION} REQUIRED CONFIG COMPONENTS Core Gui Widgets DBus Svg)
 find_package(KF6 ${KF6_MIN_VERSION} REQUIRED COMPONENTS
     ColorScheme
